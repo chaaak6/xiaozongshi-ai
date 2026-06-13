@@ -1,0 +1,22 @@
+{
+  "sessions.back": "返回会话列表",
+  "sessions.detail": "会话消息",
+  "sessions.messages": "消息数",
+  "sessions.searchPlaceholder": "按用户邮箱搜索...",
+  "sessions.title": "会话存档",
+  "sessions.updatedAt": "最后更新",
+  "sessions.user": "用户",
+  "agents.category": "分类",
+  "agents.enabled": "启用",
+  "agents.model": "模型",
+  "agents.name": "名称",
+  "agents.searchPlaceholder": "搜索智能体...",
+  "agents.title": "智能体管理",
+  "agents.toggleSuccess": "智能体状态已更新",
+  "users.createdAt": "创建时间",
+  "users.email": "邮箱",
+  "users.name": "名称",
+  "users.searchPlaceholder": "搜索用户...",
+  "users.status": "状态",
+  "users.title": "用户管理"
+}

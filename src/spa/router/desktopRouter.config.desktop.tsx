@@ -123,6 +123,7 @@ import AdminKnowledgePage from '@/routes/admin/knowledge';
 import AdminLayout from '@/routes/admin/_layout';
 import AdminPluginsPage from '@/routes/admin/plugins';
 import AdminRbacPage from '@/routes/admin/rbac';
+import AdminSessionDetailPage from '@/routes/admin/sessions/[id]';
 import AdminSessionsPage from '@/routes/admin/sessions';
 import AdminUsersPage from '@/routes/admin/users';
 import { routeMeta } from '@/spa/router/routeMeta';
@@ -750,6 +751,7 @@ export const desktopRoutes: RouteObject[] = [
     children: [
       { element: <AdminDashboardPage />, index: true },
       { element: <AdminSessionsPage />, path: 'sessions' },
+      { element: <AdminSessionDetailPage />, path: 'sessions/:id' },
       { element: <AdminAgentsPage />, path: 'agents' },
       { element: <AdminPluginsPage />, path: 'plugins' },
       { element: <AdminKnowledgePage />, path: 'knowledge' },

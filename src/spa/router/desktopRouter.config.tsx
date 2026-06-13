@@ -965,6 +965,13 @@ export const desktopRoutes: RouteObject[] = [
         path: 'sessions',
       },
       {
+        element: dynamicElement(
+          () => import('@/routes/admin/sessions/[id]'),
+          'Desktop > Admin > Session Detail',
+        ),
+        path: 'sessions/:id',
+      },
+      {
         element: dynamicElement(() => import('@/routes/admin/agents'), 'Desktop > Admin > Agents'),
         path: 'agents',
       },

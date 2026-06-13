@@ -1,0 +1,22 @@
+{
+  "sessions.back": "Back to Sessions",
+  "sessions.detail": "Session Messages",
+  "sessions.messages": "Messages",
+  "sessions.searchPlaceholder": "Search by user email...",
+  "sessions.title": "Session Archive",
+  "sessions.updatedAt": "Last Updated",
+  "sessions.user": "User",
+  "agents.category": "Category",
+  "agents.enabled": "Enabled",
+  "agents.model": "Model",
+  "agents.name": "Name",
+  "agents.searchPlaceholder": "Search agents...",
+  "agents.title": "Agent Management",
+  "agents.toggleSuccess": "Agent status updated",
+  "users.createdAt": "Created",
+  "users.email": "Email",
+  "users.name": "Name",
+  "users.searchPlaceholder": "Search users...",
+  "users.status": "Status",
+  "users.title": "User Management"
+}
