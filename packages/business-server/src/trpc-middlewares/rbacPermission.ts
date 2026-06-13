@@ -1,28 +1,61 @@
-import { trpc } from '@/libs/trpc/lambda/init';
+import { TRPCError } from '@trpc/server';
 
 /**
- * No-op stub for OSS builds. Cloud overrides this entire module via tsconfig
- * path priority and provides the real workspace-RBAC-aware implementations
- * (see `src/business/server/trpc-middlewares/rbacPermission.ts` in the cloud
- * repo). In OSS there is no workspace concept worth gating, so every gate
- * passes through.
- *
- * Keep the export shape identical to the cloud version so router code that
- * imports from `@/business/server/trpc-middlewares/rbacPermission` compiles
- * and runs in both environments without conditional imports.
+ * tRPC middleware: checks whether the current user holds a specific permission code.
+ * Depends on `ctx.userPermissions` (string array) injected by the checkAuth middleware.
  */
-export const withRbacPermission = (_code: string) => trpc.middleware(async (opts) => opts.next());
+export function withRbacPermission(code: string) {
+  return async function rbacPermissionMiddleware({ ctx, next }: any) {
+    const permissions: string[] = ctx.userPermissions ?? [];
 
-export const withAnyRbacPermission = (_codes: string[]) =>
-  trpc.middleware(async (opts) => opts.next());
+    if (!permissions.includes(code)) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: `Missing permission: ${code}`,
+      });
+    }
 
-export const withAllRbacPermissions = (_codes: string[]) =>
-  trpc.middleware(async (opts) => opts.next());
+    return next();
+  };
+}
+
+export function withAnyRbacPermission(codes: string[]) {
+  return async function rbacAnyPermissionMiddleware({ ctx, next }: any) {
+    const permissions: string[] = ctx.userPermissions ?? [];
+
+    const hasAny = codes.some((code) => permissions.includes(code));
+    if (!hasAny) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: `Missing any permission: ${codes.join(', ')}`,
+      });
+    }
+
+    return next();
+  };
+}
+
+export function withAllRbacPermissions(codes: string[]) {
+  return async function rbacAllPermissionsMiddleware({ ctx, next }: any) {
+    const permissions: string[] = ctx.userPermissions ?? [];
+
+    const hasAll = codes.every((code) => permissions.includes(code));
+    if (!hasAll) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: `Missing all permissions: ${codes.join(', ')}`,
+      });
+    }
+
+    return next();
+  };
+}
 
 /**
- * Sugar for the "member-or-owner" gate — in cloud this fans the action code
- * out into the `:all | :owner` scope pair so a member with the `:owner` grant
- * passes alongside an owner with the `:all` grant. OSS no-op.
+ * Sugar for the "member-or-owner" gate: expands the action code into the
+ * `:all | :owner` scope pair. A member with the `:owner` grant passes
+ * alongside an owner with the `:all` grant.
  */
-export const withScopedPermission = (_action: string) =>
-  trpc.middleware(async (opts) => opts.next());
+export function withScopedPermission(action: string) {
+  return withAnyRbacPermission([`${action}:all`, `${action}:owner`]);
+}

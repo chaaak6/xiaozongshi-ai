@@ -470,3 +470,16 @@ export const legacyRoleToWorkspaceRole = (role: string): WorkspaceSystemRoleName
     }
   }
 };
+
+// ============ Admin Role Permissions ============
+
+export const ADMIN_ROLE_PERMISSIONS = [
+  { code: 'admin:access', category: 'admin' as const },
+  { code: 'audit:read', category: 'audit' as const },
+  { code: 'session:read', category: 'session' as const },
+  { code: 'user:manage', category: 'user' as const },
+  { code: 'knowledge_base:manage', category: 'knowledge_base' as const },
+  { code: 'agent:manage', category: 'agent' as const },
+  { code: 'plugin:manage', category: 'plugin' as const },
+  { code: 'rbac:manage', category: 'rbac' as const },
+];

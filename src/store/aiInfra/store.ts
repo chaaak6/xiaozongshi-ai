@@ -11,14 +11,16 @@ import { type AiModelAction } from './slices/aiModel';
 import { createAiModelSlice } from './slices/aiModel';
 import { type AiProviderAction } from './slices/aiProvider';
 import { createAiProviderSlice } from './slices/aiProvider';
+import { type PermissionAction } from './slices/permission';
+import { createPermissionSlice } from './slices/permission';
 
 //  ===============  Aggregate createStoreFn ============ //
 
-export interface AiInfraStore extends AIProviderStoreState, AiProviderAction, AiModelAction {
+export interface AiInfraStore extends AIProviderStoreState, AiProviderAction, AiModelAction, PermissionAction {
   /* empty */
 }
 
-type AiInfraStoreAction = AiProviderAction & AiModelAction;
+type AiInfraStoreAction = AiProviderAction & AiModelAction & PermissionAction;
 
 const createStore: StateCreator<AiInfraStore, [['zustand/devtools', never]]> = (
   ...parameters: Parameters<StateCreator<AiInfraStore, [['zustand/devtools', never]]>>
@@ -27,6 +29,7 @@ const createStore: StateCreator<AiInfraStore, [['zustand/devtools', never]]> = (
   ...flattenActions<AiInfraStoreAction>([
     createAiModelSlice(...parameters),
     createAiProviderSlice(...parameters),
+    createPermissionSlice(...parameters),
   ]),
 });
 
