@@ -10,6 +10,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 
 import { permissions, rolePermissions, roles, userRoles } from '../schemas/rbac';
 import type { LobeChatDatabase } from '../type';
+import { createNanoId } from './idGenerator';
 
 /**
  * Map a permission code (e.g. `agent:create`) to the category column —
@@ -136,6 +137,7 @@ const upsertWorkspaceRole = async (
 };
 
 export interface SeededWorkspaceRoles {
+  adminRoleId: string;
   memberRoleId: string;
   ownerRoleId: string;
   viewerRoleId: string;
@@ -174,7 +176,70 @@ export const seedWorkspaceRoles = async (
     permissionIdByCode,
   );
 
-  return { memberRoleId, ownerRoleId, viewerRoleId };
+  // Seed admin role (workspace-scoped enterprise admin)
+  const adminRoleId = createNanoId(16)();
+
+  // Upsert admin role
+  await db
+    .insert(roles)
+    .values({
+      displayName: '管理员',
+      id: adminRoleId,
+      isActive: true,
+      isSystem: true,
+      name: 'admin',
+      workspaceId,
+    })
+    .onConflictDoUpdate({
+      set: { displayName: '管理员' },
+      target: [roles.name, roles.workspaceId],
+    });
+
+  // Ensure admin permission codes exist in rbac_permissions
+  const adminPermissionCodes = [
+    { category: 'admin', code: 'admin:access' },
+    { category: 'audit', code: 'audit:read' },
+    { category: 'session', code: 'session:read' },
+    { category: 'user', code: 'user:manage' },
+    { category: 'knowledge_base', code: 'knowledge_base:manage' },
+    { category: 'agent', code: 'agent:manage' },
+    { category: 'plugin', code: 'plugin:manage' },
+    { category: 'rbac', code: 'rbac:manage' },
+  ];
+
+  for (const perm of adminPermissionCodes) {
+    // Ensure permission code exists
+    await db
+      .insert(permissions)
+      .values({
+        category: perm.category,
+        code: perm.code,
+        isActive: true,
+        name: perm.code,
+      })
+      .onConflictDoNothing();
+  }
+
+  // Link admin role to permissions
+  for (const perm of adminPermissionCodes) {
+    const existing = await db
+      .select({ id: permissions.id })
+      .from(permissions)
+      .where(eq(permissions.code, perm.code))
+      .limit(1);
+
+    if (existing.length > 0) {
+      await db
+        .insert(rolePermissions)
+        .values({
+          permissionId: existing[0].id,
+          roleId: adminRoleId,
+        })
+        .onConflictDoNothing();
+    }
+  }
+
+  return { adminRoleId, memberRoleId, ownerRoleId, viewerRoleId };
 };
 
 /**
