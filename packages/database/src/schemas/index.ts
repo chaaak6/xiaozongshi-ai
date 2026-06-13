@@ -18,6 +18,7 @@ export * from './documentHistory';
 export * from './documentShare';
 export * from './file';
 export * from './generation';
+export * from './knowledgeBasePermission';
 export * from './llmGenerationTracing';
 export * from './message';
 export * from './messengerAccountLink';

@@ -228,6 +228,7 @@ export const knowledgeBases = pgTable(
     clientId: text('client_id'),
 
     isPublic: boolean('is_public').default(false),
+    visibility: varchar('visibility', { length: 16 }).notNull().default('workspace'),
 
     settings: jsonb('settings'),
 
