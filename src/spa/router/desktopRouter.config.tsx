@@ -949,6 +949,55 @@ export const desktopRoutes: RouteObject[] = [
         },
       ]
     : []),
+
+  // Admin console route (outside main layout, own sidebar + permission gate)
+  {
+    children: [
+      {
+        element: dynamicElement(() => import('@/routes/admin'), 'Desktop > Admin > Dashboard'),
+        index: true,
+      },
+      {
+        element: dynamicElement(
+          () => import('@/routes/admin/sessions'),
+          'Desktop > Admin > Sessions',
+        ),
+        path: 'sessions',
+      },
+      {
+        element: dynamicElement(() => import('@/routes/admin/agents'), 'Desktop > Admin > Agents'),
+        path: 'agents',
+      },
+      {
+        element: dynamicElement(
+          () => import('@/routes/admin/plugins'),
+          'Desktop > Admin > Plugins',
+        ),
+        path: 'plugins',
+      },
+      {
+        element: dynamicElement(
+          () => import('@/routes/admin/knowledge'),
+          'Desktop > Admin > Knowledge',
+        ),
+        path: 'knowledge',
+      },
+      {
+        element: dynamicElement(() => import('@/routes/admin/users'), 'Desktop > Admin > Users'),
+        path: 'users',
+      },
+      {
+        element: dynamicElement(() => import('@/routes/admin/rbac'), 'Desktop > Admin > RBAC'),
+        path: 'rbac',
+      },
+    ],
+    element: dynamicLayout(
+      () => import('@/routes/admin/_layout'),
+      'Desktop > Admin > Layout',
+    ),
+    errorElement: <ErrorBoundary />,
+    path: '/admin',
+  },
 ];
 
 desktopRoutes.push({

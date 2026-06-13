@@ -116,6 +116,15 @@ import ShareTopicPage from '@/routes/share/t/[id]';
 import ShareTopicLayout from '@/routes/share/t/[id]/_layout';
 import { shareTopicRouteMeta } from '@/routes/share/t/[id]/routeMeta';
 import VerifyImPage from '@/routes/verify-im';
+// Admin routes — sync imports (Electron local)
+import AdminAgentsPage from '@/routes/admin/agents';
+import AdminDashboardPage from '@/routes/admin';
+import AdminKnowledgePage from '@/routes/admin/knowledge';
+import AdminLayout from '@/routes/admin/_layout';
+import AdminPluginsPage from '@/routes/admin/plugins';
+import AdminRbacPage from '@/routes/admin/rbac';
+import AdminSessionsPage from '@/routes/admin/sessions';
+import AdminUsersPage from '@/routes/admin/users';
 import { routeMeta } from '@/spa/router/routeMeta';
 import { SettingsTabs } from '@/store/global/initialState';
 import { ErrorBoundary, redirectElement } from '@/utils/router';
@@ -735,6 +744,22 @@ export const desktopRoutes: RouteObject[] = [
         },
       ]
     : []),
+
+  // Admin console route (outside main layout, own sidebar + permission gate)
+  {
+    children: [
+      { element: <AdminDashboardPage />, index: true },
+      { element: <AdminSessionsPage />, path: 'sessions' },
+      { element: <AdminAgentsPage />, path: 'agents' },
+      { element: <AdminPluginsPage />, path: 'plugins' },
+      { element: <AdminKnowledgePage />, path: 'knowledge' },
+      { element: <AdminUsersPage />, path: 'users' },
+      { element: <AdminRbacPage />, path: 'rbac' },
+    ],
+    element: <AdminLayout />,
+    errorElement: <ErrorBoundary />,
+    path: '/admin',
+  },
 ];
 
 // Desktop onboarding route (Electron only in .desktop.tsx)
