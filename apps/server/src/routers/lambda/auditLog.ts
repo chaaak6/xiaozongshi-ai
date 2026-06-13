@@ -3,8 +3,9 @@ import { z } from 'zod';
 
 import { authedProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
+import { withRbacPermission } from '@/business/server/trpc-middlewares/rbacPermission';
 
-const auditLogProcedure = authedProcedure.use(serverDatabase);
+const auditLogProcedure = authedProcedure.use(serverDatabase).use(withRbacPermission('admin:access'));
 
 export const auditLogRouter = router({
   query: auditLogProcedure

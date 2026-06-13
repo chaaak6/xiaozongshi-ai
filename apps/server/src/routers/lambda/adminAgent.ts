@@ -1,10 +1,11 @@
 import { z } from 'zod';
-import { authedProcedure } from '@/libs/trpc/lambda';
+import { authedProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
+import { withRbacPermission } from '@/business/server/trpc-middlewares/rbacPermission';
 
-const agentAdminProcedure = authedProcedure.use(serverDatabase);
+const agentAdminProcedure = authedProcedure.use(serverDatabase).use(withRbacPermission('admin:access'));
 
-export const adminAgentRouter = {
+export const adminAgentRouter = router({
   /** 管理员列出所有智能体 */
   listAll: agentAdminProcedure
     .input(z.object({
@@ -52,4 +53,4 @@ export const adminAgentRouter = {
 
       return { success: true };
     }),
-};
+});

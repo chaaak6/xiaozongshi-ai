@@ -1,10 +1,11 @@
 import { z } from 'zod';
-import { authedProcedure } from '@/libs/trpc/lambda';
+import { authedProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
+import { withRbacPermission } from '@/business/server/trpc-middlewares/rbacPermission';
 
-const pluginAdminProcedure = authedProcedure.use(serverDatabase);
+const pluginAdminProcedure = authedProcedure.use(serverDatabase).use(withRbacPermission('admin:access'));
 
-export const adminPluginRouter = {
+export const adminPluginRouter = router({
   /** 管理员列出所有插件（简化版，返回空数据骨架） */
   listAllPlugins: pluginAdminProcedure
     .input(z.object({
@@ -18,4 +19,4 @@ export const adminPluginRouter = {
       // 目前返回空骨架，后续可接入实际表
       return { data: [], total: 0 };
     }),
-};
+});

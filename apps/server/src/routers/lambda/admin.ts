@@ -3,8 +3,9 @@ import { z } from 'zod';
 
 import { authedProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
+import { withRbacPermission } from '@/business/server/trpc-middlewares/rbacPermission';
 
-const adminProcedure = authedProcedure.use(serverDatabase);
+const adminProcedure = authedProcedure.use(serverDatabase).use(withRbacPermission('admin:access'));
 
 export const adminRouter = router({
   /** 仪表盘统计数据 */
@@ -61,6 +62,14 @@ export const adminRouter = router({
       let conditions = [];
       if (input.userId) {
         conditions.push(eq(sessions.userId, input.userId));
+      }
+      if (input.search) {
+        conditions.push(
+          or(
+            ilike(users.email, `%${input.search}%`),
+            ilike(sessions.groupId, `%${input.search}%`),
+          ),
+        );
       }
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 

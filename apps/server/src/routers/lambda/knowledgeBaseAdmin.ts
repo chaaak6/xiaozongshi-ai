@@ -4,8 +4,9 @@ import { z } from 'zod';
 import { knowledgeBasePermissions, knowledgeBases } from '@/database/schemas';
 import { authedProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
+import { withRbacPermission } from '@/business/server/trpc-middlewares/rbacPermission';
 
-const kbAdminProcedure = authedProcedure.use(serverDatabase);
+const kbAdminProcedure = authedProcedure.use(serverDatabase).use(withRbacPermission('admin:access'));
 
 export const knowledgeBaseAdminRouter = router({
   listAll: kbAdminProcedure
