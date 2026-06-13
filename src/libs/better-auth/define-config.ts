@@ -3,6 +3,7 @@ import { passkey } from '@better-auth/passkey';
 import { createNanoId, idGenerator, serverDB } from '@lobechat/database';
 import * as schema from '@lobechat/database/schemas';
 import bcrypt from 'bcryptjs';
+import { and, eq } from 'drizzle-orm';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { verifyPassword as defaultVerifyPassword } from 'better-auth/crypto';
 import { type BetterAuthOptions } from 'better-auth/minimal';
@@ -205,6 +206,36 @@ export function defineConfig(customOptions: CustomBetterAuthOptions) {
               createdAt: user.createdAt,
               // TODO: if add phone plugin, we should fill phone here
             });
+
+            // SSO 登录后自动分配默认角色
+            const defaultRole = process.env.AUTH_SSO_DEFAULT_ROLE;
+            if (defaultRole && user?.id) {
+              try {
+                // 查找用户的默认 workspace(通过 workspace_members 表)
+                const member = await serverDB.query.workspaceMembers.findFirst({
+                  where: (members, { eq }) => eq(members.userId, user.id),
+                });
+                if (member) {
+                  // 查找角色 ID
+                  const role = await serverDB.query.roles.findFirst({
+                    where: (roles, { eq, and }) => and(
+                      eq(roles.name, defaultRole),
+                      eq(roles.workspaceId, member.workspaceId),
+                    ),
+                  });
+                  if (role) {
+                    await serverDB.insert(schema.userRoles).values({
+                      id: crypto.randomUUID(),
+                      userId: user.id,
+                      roleId: role.id,
+                      workspaceId: member.workspaceId,
+                    }).onConflictDoNothing();
+                  }
+                }
+              } catch (err) {
+                console.warn('SSO default role assignment failed:', err);
+              }
+            }
           },
         },
       },
