@@ -9,6 +9,7 @@ export * from './agentSkill';
 export * from './aiInfra';
 export * from './apiKey';
 export * from './asyncTask';
+export * from './auditLog';
 export * from './betterAuth';
 export * from './chatGroup';
 export * from './connector';
