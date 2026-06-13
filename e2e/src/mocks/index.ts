@@ -6,6 +6,7 @@
  */
 import type { Page, Route } from 'playwright';
 
+import { adminMocks } from './admin';
 import { discoverMocks } from './community';
 
 // ============================================
@@ -35,6 +36,7 @@ export interface MockConfig {
 const defaultConfig: MockConfig = {
   enabled: true,
   handlers: {
+    admin: adminMocks,
     community: discoverMocks,
     // Add more domains here as needed:
     // user: userMocks,

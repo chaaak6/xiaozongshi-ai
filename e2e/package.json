@@ -11,7 +11,13 @@
     "test:headed": "cross-env HEADLESS=false cucumber-js --config cucumber.config.js",
     "test:routes": "cucumber-js --config cucumber.config.js --tags '@routes'",
     "test:routes:ci": "cucumber-js --config cucumber.config.js --tags '@routes and not @ci-skip'",
-    "test:smoke": "cucumber-js --config cucumber.config.js --tags '@smoke'"
+    "test:smoke": "cucumber-js --config cucumber.config.js --tags '@smoke'",
+    "test:admin": "cucumber-js --config cucumber.config.js --tags '@admin'",
+    "test:admin:smoke": "cucumber-js --config cucumber.config.js --tags '@admin and @smoke'",
+    "test:newapi": "cucumber-js --config cucumber.config.js --tags '@newapi'",
+    "test:newapi:smoke": "cucumber-js --config cucumber.config.js --tags '@newapi and @smoke'",
+    "test:all:mocked": "cucumber-js --config cucumber.config.js --tags '@admin or @newapi'",
+    "test:headed:admin": "cross-env HEADLESS=false cucumber-js --config cucumber.config.js --tags '@admin'"
   },
   "dependencies": {
     "@cucumber/cucumber": "^12.2.0",

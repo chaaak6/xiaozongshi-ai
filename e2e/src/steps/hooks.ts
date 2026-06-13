@@ -4,6 +4,8 @@ import { chromium, type Cookie } from 'playwright';
 import { seedTestUser, TEST_USER } from '../support/seedTestUser';
 import { startWebServer, stopWebServer } from '../support/webServer';
 import type { CustomWorld } from '../support/world';
+import { mockManager } from '../mocks';
+import { llmMockManager, presetResponses } from '../mocks/llm';
 
 process.env['E2E'] = '1';
 // Set default timeout for all steps to 30 seconds
@@ -102,12 +104,36 @@ Before(async function (this: CustomWorld, { pickle }) {
       tag.name.startsWith('@AGENT-') ||
       tag.name.startsWith('@HOME-') ||
       tag.name.startsWith('@PAGE-') ||
-      tag.name.startsWith('@ROUTES-'),
+      tag.name.startsWith('@ROUTES-') ||
+      tag.name.startsWith('@ADMIN-') ||
+      tag.name.startsWith('@NEWAPI-'),
   );
   console.log(`\n📝 Running: ${pickle.name}${testId ? ` (${testId.name.replace('@', '')})` : ''}`);
 
-  // Setup API mocks before any page navigation
-  // await mockManager.setup(this.page);
+  // Setup Admin API mocks when @admin tag is present
+  const isAdminTest = pickle.tags.some((tag) => tag.name.startsWith('@admin'));
+  if (isAdminTest) {
+    await mockManager.setup(this.page);
+    console.log('   🔧 Admin mocks enabled');
+  }
+
+  // Setup NewAPI LLM mocks when @newapi tag is present
+  const isNewapiTest = pickle.tags.some((tag) => tag.name.startsWith('@newapi'));
+  if (isNewapiTest || isAdminTest) {
+    // LLM Mock + tRPC mocks
+    await mockManager.setup(this.page);
+    if (isNewapiTest) {
+      await llmMockManager.setup(this.page);
+      // 预设 NewAPI 回复
+      llmMockManager.setResponse('你好', presetResponses.greeting);
+      llmMockManager.setResponse(
+        '你好，请介绍一下自己',
+        '你好！我是小宗师AI，企业内部的智能助手。我由 NewAPI 中转站提供技术支持，可以接入多种大模型为您服务。',
+      );
+      llmMockManager.setResponse('帮我写一段代码', presetResponses.codeHelp);
+      console.log('   🤖 NewAPI LLM mocks enabled');
+    }
+  }
 
   // Set cached session cookies to skip login
   if (sessionCookies.length > 0) {
@@ -124,7 +150,9 @@ After(async function (this: CustomWorld, { pickle, result }) {
         tag.name.startsWith('@AGENT-') ||
         tag.name.startsWith('@HOME-') ||
         tag.name.startsWith('@PAGE-') ||
-        tag.name.startsWith('@ROUTES-'),
+        tag.name.startsWith('@ROUTES-') ||
+        tag.name.startsWith('@ADMIN-') ||
+        tag.name.startsWith('@NEWAPI-'),
     )
     ?.name.replace('@', '');
 

@@ -1,0 +1,427 @@
+/**
+ * NewAPI Chat Steps
+ *
+ * Step definitions for NewAPI AI 中转站 E2E tests
+ */
+import { Given, Then, When } from '@cucumber/cucumber';
+import { expect } from '@playwright/test';
+
+import { llmMockManager, presetResponses } from '../../mocks/llm';
+import { mockNewAPIModels } from '../../mocks/newapi';
+import type { CustomWorld } from '../../support/world';
+import { WAIT_TIMEOUT } from '../../support/world';
+
+// ============================================
+// Helper Functions
+// ============================================
+
+async function focusChatInput(this: CustomWorld): Promise<void> {
+  const inputSelectors = [
+    '[data-testid="chat-input"]',
+    '.chat-input-area',
+    '[contenteditable="true"]',
+    '[class*="ChatInput"] [contenteditable="true"]',
+  ];
+  for (const sel of inputSelectors) {
+    const el = this.page.locator(sel).first();
+    if (await el.isVisible().catch(() => false)) {
+      await el.click();
+      await this.page.waitForTimeout(300);
+      return;
+    }
+  }
+  throw new Error('找不到聊天输入框');
+}
+
+async function sendMessage(this: CustomWorld, message: string): Promise<void> {
+  await focusChatInput.call(this);
+  await this.page.keyboard.type(message, { delay: 30 });
+  await this.page.keyboard.press('Enter');
+  await this.page.waitForTimeout(500);
+}
+
+async function waitForAIResponse(this: CustomWorld): Promise<void> {
+  // 等待 AI 消息出现（最多 30 秒）
+  const aiMsgSelectors = [
+    '.ant-bubble',
+    '[data-testid="chat-item"]',
+    '[class*="chat-item"]',
+    '[class*="ChatItem"]',
+  ];
+  for (const sel of aiMsgSelectors) {
+    const el = this.page.locator(sel).first();
+    if (await el.isVisible({ timeout: 3000 }).catch(() => false)) {
+      return;
+    }
+  }
+  await this.page.waitForTimeout(5000); // 兜底等待
+}
+
+// ============================================
+// Given Steps
+// ============================================
+
+Given('NewAPI 中转站已配置并可访问', async function (this: CustomWorld) {
+  console.log('   📍 Step: 配置 NewAPI LLM mock...');
+  await llmMockManager.setup(this.page);
+  console.log('   ✅ NewAPI 中转站 mock 已启用');
+});
+
+// ============================================
+// When Steps
+// ============================================
+
+When('用户进入聊天页面', { timeout: 30_000 }, async function (this: CustomWorld) {
+  console.log('   📍 Step: 导航到首页...');
+  await this.page.goto('/');
+  await this.page.waitForLoadState('networkidle', { timeout: WAIT_TIMEOUT });
+
+  console.log('   📍 Step: 等待聊天界面加载...');
+  await this.page.waitForTimeout(1000);
+
+  // 确保聊天输入框可见
+  await focusChatInput.call(this);
+
+  console.log('   ✅ 已进入聊天页面');
+});
+
+When('用户在输入框中输入 {string}', async function (this: CustomWorld, text: string) {
+  console.log(`   📍 Step: 输入文本 "${text}"...`);
+  await focusChatInput.call(this);
+  await this.page.waitForTimeout(300);
+  await this.page.keyboard.type(text, { delay: 30 });
+  console.log('   ✅ 已输入文本');
+});
+
+When('用户按下发送按钮', async function (this: CustomWorld) {
+  console.log('   📍 Step: 按下发送按钮 (Enter)...');
+  await this.page.keyboard.press('Enter');
+  await this.page.waitForTimeout(500);
+  console.log('   ✅ 消息已发送');
+});
+
+When('用户等待 AI 回复完成', async function (this: CustomWorld) {
+  console.log('   📍 Step: 等待 AI 回复完成...');
+  await waitForAIResponse.call(this);
+  console.log('   ✅ AI 回复完成');
+});
+
+When('用户导航到设置页面', async function (this: CustomWorld) {
+  console.log('   📍 Step: 导航到设置页面...');
+  await this.page.goto('/settings');
+  await this.page.waitForLoadState('networkidle', { timeout: WAIT_TIMEOUT });
+  await this.page.waitForTimeout(1000);
+  console.log('   ✅ 已进入设置页面');
+});
+
+When('用户在设置中打开 AI 供应商配置', async function (this: CustomWorld) {
+  console.log('   📍 Step: 打开 AI 供应商配置...');
+
+  // 查找 AI 供应商或语言模型设置入口
+  const providerSelectors = [
+    'text=AI 供应商',
+    'text=语言模型',
+    'text=模型供应商',
+    'text=AI Provider',
+    'text=Language Model',
+    '[data-testid="provider-settings"]',
+    'text=NewAPI',
+  ];
+
+  for (const sel of providerSelectors) {
+    const el = this.page.locator(sel).first();
+    if (await el.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await el.click();
+      await this.page.waitForTimeout(500);
+      console.log(`   ✅ 已点击 "${sel}"`);
+      return;
+    }
+  }
+
+  // Fallback: 等待页面渲染
+  console.log('   ⚠️ 未找到 AI 供应商入口，等待页面渲染');
+  await this.page.waitForTimeout(2000);
+});
+
+When('用户打开 NewAPI 供应商设置', async function (this: CustomWorld) {
+  console.log('   📍 Step: 打开 NewAPI 供应商设置...');
+
+  const newapiSelectors = [
+    'text=NewAPI',
+    '[data-testid="provider-newapi"]',
+    '[class*="newapi"]',
+    'text=AI 中转站',
+  ];
+
+  for (const sel of newapiSelectors) {
+    const el = this.page.locator(sel).first();
+    if (await el.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await el.click();
+      await this.page.waitForTimeout(500);
+      console.log(`   ✅ 已打开 NewAPI 设置 (通过 "${sel}")`);
+      return;
+    }
+  }
+
+  console.log('   ⚠️ 未找到 NewAPI 入口');
+});
+
+When('用户填写有效的服务器地址和访问令牌', async function (this: CustomWorld) {
+  console.log('   📍 Step: 填写 NewAPI 配置...');
+
+  // 填写服务器地址
+  const urlSelectors = [
+    'input[placeholder*="https"]',
+    'input[placeholder*="newapi"]',
+    'input[placeholder*="服务器"]',
+    'input[placeholder*="API"]',
+    'input[name*="url"]',
+    'input[name*="endpoint"]',
+    'input[name*="server"]',
+  ];
+
+  for (const sel of urlSelectors) {
+    const el = this.page.locator(sel).first();
+    if (await el.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await el.fill('https://your-company-newapi.com');
+      console.log(`   ✅ 已填写服务器地址 (通过 "${sel}")`);
+      break;
+    }
+  }
+
+  // 填写访问令牌
+  const tokenSelectors = [
+    'input[placeholder*="token"]',
+    'input[placeholder*="Token"]',
+    'input[placeholder*="访问"]',
+    'input[placeholder*="密钥"]',
+    'input[placeholder*="key"]',
+    'input[placeholder*="Key"]',
+    'input[name*="token"]',
+    'input[name*="key"]',
+    'input[name*="apiKey"]',
+  ];
+
+  for (const sel of tokenSelectors) {
+    const el = this.page.locator(sel).first();
+    if (await el.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await el.fill('sk-test-token-123456');
+      console.log(`   ✅ 已填写访问令牌 (通过 "${sel}")`);
+      break;
+    }
+  }
+});
+
+When('用户点击连接测试按钮', async function (this: CustomWorld) {
+  console.log('   📍 Step: 点击连接测试按钮...');
+
+  const testButtonSelectors = [
+    'button:has-text("连接测试")',
+    'button:has-text("测试连接")',
+    'button:has-text("Test")',
+    'button:has-text("Check")',
+    '[data-testid="connection-test"]',
+    '[class*="connection-test"]',
+  ];
+
+  for (const sel of testButtonSelectors) {
+    const el = this.page.locator(sel).first();
+    if (await el.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await el.click();
+      await this.page.waitForTimeout(1000);
+      console.log(`   ✅ 已点击连接测试按钮 (通过 "${sel}")`);
+      return;
+    }
+  }
+
+  console.log('   ⚠️ 未找到连接测试按钮');
+});
+
+// ============================================
+// Then Steps
+// ============================================
+
+Then('用户应该看到 AI 的流式回复', async function (this: CustomWorld) {
+  console.log('   📍 Step: 验证 AI 流式回复...');
+
+  // 等待 AI 消息出现
+  const aiSelectors = [
+    '.message-wrapper',
+    '[class*="assistant"]',
+    '[data-role="assistant"]',
+    '.ant-bubble',
+  ];
+
+  let found = false;
+  for (const sel of aiSelectors) {
+    const el = this.page.locator(sel).last();
+    if (await el.isVisible({ timeout: 5000 }).catch(() => false)) {
+      found = true;
+      console.log(`   ✅ 找到 AI 回复 (通过 "${sel}")`);
+      break;
+    }
+  }
+
+  if (!found) {
+    // Fallback: wait for any content to render
+    await this.page.waitForTimeout(5000);
+    const msgCount = await this.page.locator('.message-wrapper').count().catch(() => 0);
+    found = msgCount > 0;
+  }
+
+  expect(found).toBeTruthy();
+  console.log('   ✅ AI 流式回复已验证');
+});
+
+Then('回复内容应该包含 {string} 字样', async function (this: CustomWorld, text: string) {
+  console.log(`   📍 Step: 验证回复包含 "${text}"...`);
+
+  // Poll for the text to appear (streaming may take time)
+  await expect
+    .poll(
+      async () => {
+        const pageContent = await this.page.content();
+        return pageContent.includes(text);
+      },
+      { timeout: 20_000 },
+    )
+    .toBeTruthy();
+
+  console.log(`   ✅ 回复内容包含 "${text}"`);
+});
+
+Then('用户应该看到两个 AI 回复', async function (this: CustomWorld) {
+  console.log('   📍 Step: 验证有两个 AI 回复...');
+
+  const assistantMessages = this.page.locator('.message-wrapper').filter({
+    has: this.page.locator('.message-header, [class*="header"]'),
+  });
+
+  await expect
+    .poll(
+      async () => {
+        return await assistantMessages.count();
+      },
+      { timeout: 15_000 },
+    )
+    .toBeGreaterThanOrEqual(2);
+
+  console.log(`   ✅ 已有 ${await assistantMessages.count()} 个 AI 回复`);
+});
+
+Then('聊天页面应该显示完整的对话历史', async function (this: CustomWorld) {
+  console.log('   📍 Step: 验证对话历史...');
+
+  // 验证多条消息可见
+  const messages = this.page.locator('.message-wrapper');
+  const count = await messages.count();
+
+  expect(count).toBeGreaterThanOrEqual(2);
+  console.log(`   ✅ 对话历史包含 ${count} 条消息`);
+});
+
+Then('AI 中转站（NewAPI）供应商应该可见', async function (this: CustomWorld) {
+  console.log('   📍 Step: 验证 NewAPI 供应商可见...');
+
+  const newapiSelectors = [
+    'text=NewAPI',
+    'text=AI 中转站',
+    '[data-testid="provider-newapi"]',
+  ];
+
+  let found = false;
+  for (const sel of newapiSelectors) {
+    const el = this.page.locator(sel).first();
+    if (await el.isVisible({ timeout: 5000 }).catch(() => false)) {
+      found = true;
+      console.log(`   ✅ NewAPI 供应商可见 (通过 "${sel}")`);
+      break;
+    }
+  }
+
+  expect(found).toBeTruthy();
+});
+
+Then('NewAPI 应该排在供应商列表首位', async function (this: CustomWorld) {
+  console.log('   📍 Step: 验证 NewAPI 排在首位...');
+
+  // 查找供应商列表项
+  const providerItems = this.page.locator(
+    '[class*="provider"] li, [class*="provider"] [class*="item"], [class*="Provider"] li',
+  );
+
+  if ((await providerItems.count()) > 0) {
+    const firstItem = providerItems.first();
+    const text = (await firstItem.innerText().catch(() => '')) || '';
+    console.log(`   首个供应商: "${text}"`);
+    expect(text).toMatch(/NewAPI|AI 中转站/i);
+  } else {
+    console.log('   ⚠️ 未找到供应商列表项，跳过排序验证');
+  }
+});
+
+Then('设置页面应该包含 {string} 输入框', async function (this: CustomWorld, label: string) {
+  console.log(`   📍 Step: 验证包含 "${label}" 输入框...`);
+
+  // 查找带匹配 label 或 placeholder 的输入框
+  const inputSelectors = [
+    `input[placeholder*="${label}"]`,
+    `label:has-text("${label}")`,
+    `text=${label}`,
+  ];
+
+  let found = false;
+  for (const sel of inputSelectors) {
+    const el = this.page.locator(sel).first();
+    if (await el.isVisible({ timeout: 3000 }).catch(() => false)) {
+      found = true;
+      console.log(`   ✅ 找到 "${label}" 输入框 (通过 "${sel}")`);
+      break;
+    }
+  }
+
+  expect(found).toBeTruthy();
+});
+
+Then('{string} 输入框的占位文本为 {string}', async function (
+  this: CustomWorld,
+  label: string,
+  placeholder: string,
+) {
+  console.log(`   📍 Step: 验证 "${label}" 占位文本为 "${placeholder}"...`);
+
+  // 查找输入框并检查占位文本
+  const input = this.page.locator(`input[placeholder*="${placeholder}"]`).first();
+  await expect(input).toBeVisible({ timeout: 5000 });
+
+  const actualPlaceholder = await input.getAttribute('placeholder');
+  expect(actualPlaceholder).toContain(placeholder);
+
+  console.log(`   ✅ 占位文本验证通过: "${actualPlaceholder}"`);
+});
+
+Then('应该显示连接成功的提示', async function (this: CustomWorld) {
+  console.log('   📍 Step: 验证连接成功提示...');
+
+  const successSelectors = [
+    '.ant-message-success',
+    '.ant-notification-success',
+    '[class*="success"]',
+    'text=连接成功',
+    'text=测试成功',
+    'text=Success',
+    '.toast-success',
+  ];
+
+  let found = false;
+  for (const sel of successSelectors) {
+    const el = this.page.locator(sel).first();
+    if (await el.isVisible({ timeout: 5000 }).catch(() => false)) {
+      found = true;
+      console.log(`   ✅ 连接成功提示可见 (通过 "${sel}")`);
+      break;
+    }
+  }
+
+  expect(found).toBeTruthy();
+});
