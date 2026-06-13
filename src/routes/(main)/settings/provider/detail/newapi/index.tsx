@@ -15,7 +15,7 @@ const Page = () => {
         ...NewAPIProviderCard.settings,
         proxyUrl: {
           desc: t('newapi.apiUrl.desc'),
-          placeholder: 'https://any-newapi-provider.com/',
+          placeholder: 'https://your-company-newapi.com',
           title: t('newapi.apiUrl.title'),
         },
       }}
