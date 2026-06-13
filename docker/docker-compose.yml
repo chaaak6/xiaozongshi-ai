@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  lobechat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: xiaozongshi-ai
+    ports:
+      - "3210:3210"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/lobechat
+      - DATABASE_DRIVER=node
+      - NEWAPI_PROXY_URL=${NEWAPI_PROXY_URL:-https://your-newapi-server.com}
+      - NEWAPI_API_KEY=${NEWAPI_API_KEY:-}
+      - AUTH_SECRET=${AUTH_SECRET:-change-me-in-production}
+      - AUTH_EMAIL_VERIFICATION=false
+      - KEY_VAULTS_SECRET=${KEY_VAULTS_SECRET:-change-me-in-production}
+      - APP_URL=http://localhost:3210
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: xiaozongshi-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_DB=lobechat
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata:
