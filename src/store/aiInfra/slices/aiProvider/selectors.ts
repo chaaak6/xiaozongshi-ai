@@ -7,10 +7,17 @@ import { type GlobalLLMProviderKey } from '@/types/user/settings';
 
 // List
 const enabledAiProviderList = (s: AIProviderStoreState) =>
-  s.aiProviderList.filter((item) => item.enabled).sort((a, b) => a.sort! - b.sort!);
+  s.aiProviderList.filter((item) => item.enabled).sort((a, b) => {
+    // Prioritize newapi provider at the top of the list
+    if (a.id === 'newapi' && b.id !== 'newapi') return -1;
+    if (b.id === 'newapi' && a.id !== 'newapi') return 1;
+    return a.sort! - b.sort!;
+  });
 
 const disabledAiProviderList = (s: AIProviderStoreState) =>
-  s.aiProviderList.filter((item) => !item.enabled && item.source !== AiProviderSourceEnum.Custom);
+  s.aiProviderList
+    .filter((item) => !item.enabled && item.source !== AiProviderSourceEnum.Custom)
+    .sort((a, b) => a.sort! - b.sort!);
 
 const disabledCustomAiProviderList = (s: AIProviderStoreState) =>
   s.aiProviderList.filter((item) => !item.enabled && item.source === AiProviderSourceEnum.Custom);

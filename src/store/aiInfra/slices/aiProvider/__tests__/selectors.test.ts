@@ -63,6 +63,24 @@ describe('aiProviderSelectors', () => {
         { id: 'provider1', enabled: true, sort: 1, source: 'builtin' },
       ]);
     });
+
+    it('should prioritize newapi provider at the top', () => {
+      const stateWithNewapi = {
+        ...mockState,
+        aiProviderList: [
+          { id: 'openai', enabled: true, sort: 0, source: 'builtin' },
+          { id: 'newapi', enabled: true, sort: 10, source: 'builtin' },
+          { id: 'anthropic', enabled: true, sort: 5, source: 'builtin' },
+        ],
+      };
+      const result = aiProviderSelectors.enabledAiProviderList(stateWithNewapi);
+      expect(result[0].id).toBe('newapi');
+      expect(result).toEqual([
+        { id: 'newapi', enabled: true, sort: 10, source: 'builtin' },
+        { id: 'openai', enabled: true, sort: 0, source: 'builtin' },
+        { id: 'anthropic', enabled: true, sort: 5, source: 'builtin' },
+      ]);
+    });
   });
 
   describe('disabledAiProviderList', () => {
