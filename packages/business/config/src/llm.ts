@@ -35,6 +35,9 @@ export const DEFAULT_LLM_CONFIG = genUserLLMConfig({
   lmstudio: {
     fetchOnClient: true,
   },
+  newapi: {
+    enabled: true,
+  },
   ollama: {
     fetchOnClient: true,
   },
