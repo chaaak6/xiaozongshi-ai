@@ -78,6 +78,7 @@ export interface AuthContext {
   traceContext?: OtContext;
   userAgent?: string;
   userId?: string | null;
+  userPermissions?: string[];
   workspaceId?: string | null;
 }
 
@@ -92,6 +93,7 @@ export const createContextInner = async (params?: {
   traceContext?: OtContext;
   userAgent?: string;
   userId?: string | null;
+  userPermissions?: string[];
   workspaceId?: string | null;
 }): Promise<AuthContext> => {
   log('createContextInner called with params: %O', params);
@@ -105,6 +107,7 @@ export const createContextInner = async (params?: {
     traceContext: params?.traceContext,
     userAgent: params?.userAgent,
     userId: params?.userId,
+    userPermissions: params?.userPermissions,
     workspaceId: params?.workspaceId,
   };
 };
@@ -124,6 +127,10 @@ export const createLambdaContext = async (request: NextRequest): Promise<LambdaC
   if (process.env.NODE_ENV === 'development' && (isDebugApi || isMockUser)) {
     return createContextInner({
       userId: process.env.MOCK_DEV_USER_ID,
+      userPermissions: [
+        'admin:access', 'audit:read', 'session:read', 'user:manage',
+        'knowledge_base:manage', 'agent:manage', 'plugin:manage', 'rbac:manage',
+      ],
     });
   }
 

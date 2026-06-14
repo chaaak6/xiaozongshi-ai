@@ -1,6 +1,10 @@
 import { and, asc, count, desc, eq, gte, ilike, or } from 'drizzle-orm';
 import { z } from 'zod';
 
+import { knowledgeBases } from '@/database/schemas/file';
+import { messages } from '@/database/schemas/message';
+import { sessions } from '@/database/schemas/session';
+import { users } from '@/database/schemas/user';
 import { authedProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
 import { withRbacPermission } from '@/business/server/trpc-middlewares/rbacPermission';
@@ -16,24 +20,24 @@ export const adminRouter = router({
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    const [userCount] = await serverDB.select({ count: count() }).from(serverDB.users);
-    const [sessionCount] = await serverDB.select({ count: count() }).from(serverDB.sessions);
-    const [messageCount] = await serverDB.select({ count: count() }).from(serverDB.messages);
+    const [userCount] = await serverDB.select({ count: count() }).from(users);
+    const [sessionCount] = await serverDB.select({ count: count() }).from(sessions);
+    const [messageCount] = await serverDB.select({ count: count() }).from(messages);
     const [kbCount] = await serverDB
       .select({ count: count() })
-      .from(serverDB.knowledgeBases);
+      .from(knowledgeBases);
 
     // 7-day active sessions
     const [weeklyActiveRow] = await serverDB
       .select({ count: count() })
-      .from(serverDB.sessions)
-      .where(gte(serverDB.sessions.updatedAt, sevenDaysAgo));
+      .from(sessions)
+      .where(gte(sessions.updatedAt, sevenDaysAgo));
 
     // 30-day active users
     const [monthlyActiveRow] = await serverDB
       .select({ count: count() })
-      .from(serverDB.users)
-      .where(gte(serverDB.users.lastActiveAt, thirtyDaysAgo));
+      .from(users)
+      .where(gte(users.lastActiveAt, thirtyDaysAgo));
 
     return {
       totalUsers: Number(userCount?.count ?? 0),

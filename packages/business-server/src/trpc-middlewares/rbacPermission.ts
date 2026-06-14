@@ -3,6 +3,7 @@ import { TRPCError } from '@trpc/server';
 /**
  * tRPC middleware: checks whether the current user holds a specific permission code.
  * Depends on `ctx.userPermissions` (string array) injected by the checkAuth middleware.
+ * In dev mock-user mode, all admin permissions are injected by checkAuth automatically.
  */
 export function withRbacPermission(code: string) {
   return async function rbacPermissionMiddleware({ ctx, next }: any) {

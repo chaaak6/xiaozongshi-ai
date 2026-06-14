@@ -31,10 +31,12 @@ async function navigateToAdminPage(
   label: string,
 ): Promise<void> {
   console.log(`   📍 Step: 导航到管理后台${label} (${path})...`);
-  await this.page.goto(path);
+  // Admin routes are SPA pages served at /spa/[locale]/admin/...
+  const spaPath = `/spa/zh-CN${path}`;
+  await this.page.goto(spaPath);
   await this.page.waitForLoadState('networkidle', { timeout: WAIT_TIMEOUT });
-  await this.page.waitForTimeout(500);
-  console.log(`   ✅ 已导航到 ${path}`);
+  await this.page.waitForTimeout(1000);
+  console.log(`   ✅ 已导航到 ${path} (via ${spaPath})`);
 }
 
 /**

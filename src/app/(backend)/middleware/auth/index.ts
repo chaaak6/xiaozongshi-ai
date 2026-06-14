@@ -78,6 +78,10 @@ export const checkAuth =
         jwtPayload: { userId: mockUserId },
         serverDB,
         userId: mockUserId,
+        userPermissions: [
+          'admin:access', 'audit:read', 'session:read', 'user:manage',
+          'knowledge_base:manage', 'agent:manage', 'plugin:manage', 'rbac:manage',
+        ],
       });
     }
 
