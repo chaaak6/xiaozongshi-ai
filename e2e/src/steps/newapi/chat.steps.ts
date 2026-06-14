@@ -151,57 +151,55 @@ When('用户在设置中打开 AI 供应商配置', async function (this: Custom
 
 When('用户打开 NewAPI 供应商设置', async function (this: CustomWorld) {
   console.log('   📍 Step: 打开 NewAPI 供应商设置...');
-  // Navigate directly to the NewAPI provider detail page
-  await this.page.goto('http://localhost:9876/settings/provider/newapi');
-  await this.page.waitForLoadState('networkidle', { timeout: WAIT_TIMEOUT });
-  await this.page.waitForTimeout(1000);
+  // Navigate to the NewAPI provider detail page.
+  // /settings/provider/detail/newapi is the route; /settings/provider/newapi works too in dev.
+  await this.page.goto('http://localhost:9876/settings/provider/newapi', { waitUntil: 'domcontentloaded', timeout: WAIT_TIMEOUT });
+  // Wait for antd Form to hydrate (batch tRPC calls take time)
+  await this.page.waitForTimeout(4000);
   console.log('   ✅ 已打开 NewAPI 设置');
 });
 
 When('用户填写有效的服务器地址和访问令牌', async function (this: CustomWorld) {
   console.log('   📍 Step: 填写 NewAPI 配置...');
 
-  // The form has two antd input fields. Find all visible inputs.
-  const allInputs = this.page.locator('input:visible');
-  const count = await allInputs.count();
+  // Actual antd form inputs on this page:
+  // - input[placeholder="AI 中转站 API Key"] (type=password)
+  // - input[placeholder="https://your-company-newapi.com"] (type=text)
+  const urlInput = this.page.locator('input[placeholder*="your-company-newapi"]').first();
+  if (await urlInput.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await urlInput.fill('https://your-company-newapi.com');
+    console.log('   ✅ 已填写服务器地址');
+  } else {
+    console.log('   ⚠️ 未找到服务器地址输入框');
+  }
 
-  console.log(`   找到 ${count} 个可见输入框`);
+  await this.page.waitForTimeout(300);
 
-  // Fill server URL in the first input, token in the second
-  for (let i = 0; i < count; i++) {
-    const input = allInputs.nth(i);
-    const placeholder = await input.getAttribute('placeholder').catch(() => '');
-    console.log(`   Input[${i}] placeholder="${placeholder}"`);
-
-    if (!placeholder) continue;
-
-    if (placeholder.includes('https://') || placeholder.includes('your-company-newapi')) {
-      await input.fill('https://your-company-newapi.com');
-      console.log('   ✅ 已填写服务器地址');
-    } else if (placeholder.includes('API') || placeholder.includes('Token') || placeholder.includes('Key')) {
-      await input.fill('sk-test-token-123456');
-      console.log('   ✅ 已填写访问令牌');
-    }
+  const tokenInput = this.page.locator('input[placeholder*="API Key"]').first();
+  if (await tokenInput.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await tokenInput.fill('sk-test-token-123456');
+    console.log('   ✅ 已填写访问令牌');
+  } else {
+    console.log('   ⚠️ 未找到 API Key 输入框');
   }
 });
 
 When('用户点击连接测试按钮', async function (this: CustomWorld) {
   console.log('   📍 Step: 点击连接测试按钮...');
 
+  // Actual button text on the page: "检 查" (two chars with space)
   const testButtonSelectors = [
+    'button:has-text("检 查")',
+    'button:has-text("检查")',
     'button:has-text("连接测试")',
-    'button:has-text("测试连接")',
-    'button:has-text("Test")',
-    'button:has-text("Check")',
-    '[data-testid="connection-test"]',
-    '[class*="connection-test"]',
+    '.ant-btn:has-text("检")',
   ];
 
   for (const sel of testButtonSelectors) {
     const el = this.page.locator(sel).first();
     if (await el.isVisible({ timeout: 2000 }).catch(() => false)) {
       await el.click();
-      await this.page.waitForTimeout(1000);
+      await this.page.waitForTimeout(1500);
       console.log(`   ✅ 已点击连接测试按钮 (通过 "${sel}")`);
       return;
     }
@@ -334,43 +332,48 @@ Then('NewAPI 应该排在供应商列表首位', async function (this: CustomWor
 });
 
 Then('设置页面应该包含 {string} 输入框', async function (this: CustomWorld, label: string) {
-  console.log(`   📍 Step: 验证包含 "${label}" 输入框...`);
+  console.log(`   📍 Step: 验证包含 "${label}" 表单标签...`);
 
-  // 查找带匹配 label 或 placeholder 的输入框
-  const inputSelectors = [
-    `input[placeholder*="${label}"]`,
+  // antd Form.Item renders the label as `<label>` or text node inside `.ant-form-item`.
+  // Also check placeholder on the input itself (e.g., "API Key" becomes placeholder "AI 中转站 API Key").
+  const selectors: string[] = [
+    `.ant-form-item:has-text("${label}")`,
     `label:has-text("${label}")`,
-    `text=${label}`,
   ];
 
+  // Also check input placeholders for matching substrings
+  if (label === '中转站地址') selectors.push('input[placeholder*="your-company-newapi"]');
+  if (label === 'API Key') selectors.push('input[placeholder*="API Key"]');
+
   let found = false;
-  for (const sel of inputSelectors) {
-    const el = this.page.locator(sel).first();
-    if (await el.isVisible({ timeout: 3000 }).catch(() => false)) {
+  for (const sel of selectors) {
+    try {
+      await this.page.locator(sel).first().waitFor({ state: 'visible', timeout: 5000 });
       found = true;
-      console.log(`   ✅ 找到 "${label}" 输入框 (通过 "${sel}")`);
+      console.log(`   ✅ 找到 "${label}" (通过 "${sel}")`);
       break;
+    } catch {
+      // try next selector
     }
   }
 
   expect(found).toBeTruthy();
 });
 
-Then('{string} 输入框的占位文本为 {string}', async function (
-  this: CustomWorld,
-  label: string,
-  placeholder: string,
-) {
-  console.log(`   📍 Step: 验证 "${label}" 占位文本为 "${placeholder}"...`);
-
-  // 查找输入框并检查占位文本
+Then('输入框占位符应该显示 {string}', async function (this: CustomWorld, placeholder: string) {
+  console.log(`   📍 Step: 验证占位符 "${placeholder}"...`);
   const input = this.page.locator(`input[placeholder*="${placeholder}"]`).first();
   await expect(input).toBeVisible({ timeout: 5000 });
+  console.log(`   ✅ 占位符验证通过: "${placeholder}"`);
+});
 
-  const actualPlaceholder = await input.getAttribute('placeholder');
-  expect(actualPlaceholder).toContain(placeholder);
+// Legacy pattern
+Then('{string} 应该显示为输入框占位符', async function (this: CustomWorld, placeholder: string) {
+  console.log(`   📍 Step: 验证占位符 "${placeholder}"...`);
 
-  console.log(`   ✅ 占位文本验证通过: "${actualPlaceholder}"`);
+  const input = this.page.locator(`input[placeholder*="${placeholder}"]`).first();
+  await expect(input).toBeVisible({ timeout: 5000 });
+  console.log(`   ✅ 占位符验证通过: "${placeholder}"`);
 });
 
 Then('应该显示连接成功的提示', async function (this: CustomWorld) {
