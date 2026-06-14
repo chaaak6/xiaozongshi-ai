@@ -92,3 +92,42 @@ echo "  管理后台:  http://localhost:9876/admin"
 echo "  NewAPI设置: http://localhost:9876/settings/provider/newapi"
 echo ""
 echo "  注意: 首次访问需要等待 Vite 编译 (约30秒)"
+
+echo "=== 6. 启动 MinIO (本地 S3 存储) ==="
+MINIO_EXE="$HOME/minio/minio.exe"
+MINIO_DATA="$HOME/minio/data"
+if [ ! -f "$MINIO_EXE" ]; then
+  mkdir -p "$(dirname "$MINIO_EXE")"
+  curl -s -L -o "$MINIO_EXE" "https://dl.min.io/server/minio/release/windows-amd64/minio.exe"
+fi
+mkdir -p "$MINIO_DATA"
+
+# 检查 MinIO 是否已在运行
+if ! curl -s -o /dev/null http://localhost:9000; then
+  "$MINIO_EXE" server "$MINIO_DATA" --console-address ":9001" --address ":9000" &
+  sleep 5
+  echo "MinIO started on :9000"
+fi
+
+# 创建 bucket (幂等)
+MINIO_MC="$HOME/minio/mc.exe"
+if [ ! -f "$MINIO_MC" ]; then
+  curl -s -L -o "$MINIO_MC" "https://dl.min.io/client/mc/release/windows-amd64/mc.exe"
+fi
+"$MINIO_MC" alias set localminio http://localhost:9000 minioadmin minioadmin 2>/dev/null
+"$MINIO_MC" mb localminio/lobechat 2>/dev/null
+"$MINIO_MC" anonymous set public localminio/lobechat 2>/dev/null
+echo "MinIO bucket 'lobechat' ready"
+
+echo ""
+echo "=== 小宗师AI 开发环境就绪 ==="
+echo ""
+echo "  登录账号: e2e-test@lobehub.com / TestPassword123!"
+echo "  登录地址: http://localhost:3010/signin"
+echo ""
+echo "  AI 聊天:  登录后左侧点击「AI 中转站助手」，输入文字后 Ctrl+Enter 发送"
+echo "  管理后台:  http://localhost:9876/admin"
+echo "  NewAPI设置: http://localhost:9876/settings/provider/newapi"
+echo "  MinIO控制台: http://localhost:9001 (minioadmin/minioadmin)"
+echo ""
+echo "  注意: 首次访问需要等待 Vite 编译 (约30秒)"
