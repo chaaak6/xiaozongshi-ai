@@ -58,6 +58,11 @@ export class CustomWorld extends World {
     // Set expect timeout for assertions (e.g., toBeVisible, toHaveText)
     this.browserContext.setDefaultTimeout(30_000);
 
+    // Inject E2E flag so usePermission() grants full admin access in tests
+    await this.browserContext.addInitScript(() => {
+      (window as any).__E2E__ = true;
+    });
+
     this.page = await this.browserContext.newPage();
 
     // Set up error listeners

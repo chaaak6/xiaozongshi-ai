@@ -16,17 +16,24 @@ import { WAIT_TIMEOUT } from '../../support/world';
 // ============================================
 
 async function focusChatInput(this: CustomWorld): Promise<void> {
-  const inputSelectors = [
-    '[data-testid="chat-input"]',
-    '.chat-input-area',
-    '[contenteditable="true"]',
-    '[class*="ChatInput"] [contenteditable="true"]',
+  // Multi-strategy approach matching existing agent conversation steps
+  const candidates = [
+    { label: 'contenteditable', locator: this.page.locator('[contenteditable="true"]') },
+    { label: 'textbox role', locator: this.page.getByRole('textbox') },
+    { label: 'chat-input testid', locator: this.page.locator('[data-testid="chat-input"]') },
+    { label: 'ChatInput class', locator: this.page.locator('[class*="ChatInput"] [contenteditable="true"]') },
+    { label: 'chat-input-area', locator: this.page.locator('.chat-input-area') },
   ];
-  for (const sel of inputSelectors) {
-    const el = this.page.locator(sel).first();
-    if (await el.isVisible().catch(() => false)) {
-      await el.click();
+
+  for (const { label, locator } of candidates) {
+    const count = await locator.count();
+    for (let i = 0; i < count; i++) {
+      const item = locator.nth(i);
+      const visible = await item.isVisible().catch(() => false);
+      if (!visible) continue;
+      await item.click({ force: true });
       await this.page.waitForTimeout(300);
+      console.log(`   ✓ Focused chat input via "${label}" at index ${i}`);
       return;
     }
   }
@@ -72,12 +79,11 @@ Given('NewAPI 中转站已配置并可访问', async function (this: CustomWorld
 // ============================================
 
 When('用户进入聊天页面', { timeout: 30_000 }, async function (this: CustomWorld) {
-  console.log('   📍 Step: 导航到首页...');
-  await this.page.goto('/');
+  console.log('   📍 Step: 导航到聊天页面...');
+  // In dev mode, the SPA is served by Vite at port 9876
+  await this.page.goto('http://localhost:9876/chat');
   await this.page.waitForLoadState('networkidle', { timeout: WAIT_TIMEOUT });
-
-  console.log('   📍 Step: 等待聊天界面加载...');
-  await this.page.waitForTimeout(1000);
+  await this.page.waitForTimeout(2000);
 
   // 确保聊天输入框可见
   await focusChatInput.call(this);
@@ -108,7 +114,7 @@ When('用户等待 AI 回复完成', async function (this: CustomWorld) {
 
 When('用户导航到设置页面', async function (this: CustomWorld) {
   console.log('   📍 Step: 导航到设置页面...');
-  await this.page.goto('/settings');
+  await this.page.goto('http://localhost:9876/settings/provider');
   await this.page.waitForLoadState('networkidle', { timeout: WAIT_TIMEOUT });
   await this.page.waitForTimeout(1000);
   console.log('   ✅ 已进入设置页面');
@@ -145,69 +151,36 @@ When('用户在设置中打开 AI 供应商配置', async function (this: Custom
 
 When('用户打开 NewAPI 供应商设置', async function (this: CustomWorld) {
   console.log('   📍 Step: 打开 NewAPI 供应商设置...');
-
-  const newapiSelectors = [
-    'text=NewAPI',
-    '[data-testid="provider-newapi"]',
-    '[class*="newapi"]',
-    'text=AI 中转站',
-  ];
-
-  for (const sel of newapiSelectors) {
-    const el = this.page.locator(sel).first();
-    if (await el.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await el.click();
-      await this.page.waitForTimeout(500);
-      console.log(`   ✅ 已打开 NewAPI 设置 (通过 "${sel}")`);
-      return;
-    }
-  }
-
-  console.log('   ⚠️ 未找到 NewAPI 入口');
+  // Navigate directly to the NewAPI provider detail page
+  await this.page.goto('http://localhost:9876/settings/provider/newapi');
+  await this.page.waitForLoadState('networkidle', { timeout: WAIT_TIMEOUT });
+  await this.page.waitForTimeout(1000);
+  console.log('   ✅ 已打开 NewAPI 设置');
 });
 
 When('用户填写有效的服务器地址和访问令牌', async function (this: CustomWorld) {
   console.log('   📍 Step: 填写 NewAPI 配置...');
 
-  // 填写服务器地址
-  const urlSelectors = [
-    'input[placeholder*="https"]',
-    'input[placeholder*="newapi"]',
-    'input[placeholder*="服务器"]',
-    'input[placeholder*="API"]',
-    'input[name*="url"]',
-    'input[name*="endpoint"]',
-    'input[name*="server"]',
-  ];
+  // The form has two antd input fields. Find all visible inputs.
+  const allInputs = this.page.locator('input:visible');
+  const count = await allInputs.count();
 
-  for (const sel of urlSelectors) {
-    const el = this.page.locator(sel).first();
-    if (await el.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await el.fill('https://your-company-newapi.com');
-      console.log(`   ✅ 已填写服务器地址 (通过 "${sel}")`);
-      break;
-    }
-  }
+  console.log(`   找到 ${count} 个可见输入框`);
 
-  // 填写访问令牌
-  const tokenSelectors = [
-    'input[placeholder*="token"]',
-    'input[placeholder*="Token"]',
-    'input[placeholder*="访问"]',
-    'input[placeholder*="密钥"]',
-    'input[placeholder*="key"]',
-    'input[placeholder*="Key"]',
-    'input[name*="token"]',
-    'input[name*="key"]',
-    'input[name*="apiKey"]',
-  ];
+  // Fill server URL in the first input, token in the second
+  for (let i = 0; i < count; i++) {
+    const input = allInputs.nth(i);
+    const placeholder = await input.getAttribute('placeholder').catch(() => '');
+    console.log(`   Input[${i}] placeholder="${placeholder}"`);
 
-  for (const sel of tokenSelectors) {
-    const el = this.page.locator(sel).first();
-    if (await el.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await el.fill('sk-test-token-123456');
-      console.log(`   ✅ 已填写访问令牌 (通过 "${sel}")`);
-      break;
+    if (!placeholder) continue;
+
+    if (placeholder.includes('https://') || placeholder.includes('your-company-newapi')) {
+      await input.fill('https://your-company-newapi.com');
+      console.log('   ✅ 已填写服务器地址');
+    } else if (placeholder.includes('API') || placeholder.includes('Token') || placeholder.includes('Key')) {
+      await input.fill('sk-test-token-123456');
+      console.log('   ✅ 已填写访问令牌');
     }
   }
 });
