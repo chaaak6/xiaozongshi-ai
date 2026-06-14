@@ -2,10 +2,16 @@
 
 import { Flexbox, Text } from '@lobehub/ui';
 import { Button, Checkbox, Modal, Table, Tag, message } from 'antd';
-import { memo, useState } from 'react';
+import { memo, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { lambdaQuery } from '@/libs/trpc/client';
+const ALL_PERMISSIONS = [
+  'admin:access', 'audit:read', 'session:read', 'user:manage',
+  'knowledge_base:manage', 'agent:manage', 'plugin:manage', 'rbac:manage',
+  'agent:create:owner', 'agent:update:owner', 'agent:delete:owner',
+  'file:upload:owner', 'file:read:owner',
+  'message:create:owner', 'message:update:owner', 'message:delete:owner',
+];
 
 const AdminRbacPage = memo(() => {
   const { t } = useTranslation('admin');
@@ -13,22 +19,16 @@ const AdminRbacPage = memo(() => {
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [selectedPerms, setSelectedPerms] = useState<string[]>([]);
 
-  const { data: permissionCodes } = lambdaQuery.useMemo(() => {
-    return ['admin:access', 'audit:read', 'session:read', 'user:manage',
-      'knowledge_base:manage', 'agent:manage', 'plugin:manage', 'rbac:manage',
-      'agent:create:owner', 'agent:update:owner', 'agent:delete:owner',
-      'file:upload:owner', 'file:read:owner',
-    ];
-  }, []);
+  const permissionCodes = useMemo(() => ALL_PERMISSIONS, []);
 
-  // 简化：使用内置角色定义
-  const roles = [
-    { id: 'super_admin', name: 'super_admin', displayName: t('rbac.system'), isSystem: true },
+  // Built-in role definitions
+  const roles = useMemo(() => [
+    { id: 'super_admin', name: 'super_admin', displayName: '超级管理员', isSystem: true },
     { id: 'admin', name: 'admin', displayName: '管理员', isSystem: true },
     { id: 'workspace_owner', name: 'workspace_owner', displayName: '工作空间所有者', isSystem: true },
     { id: 'workspace_member', name: 'workspace_member', displayName: '工作空间成员', isSystem: true },
     { id: 'workspace_viewer', name: 'workspace_viewer', displayName: '工作空间查看者', isSystem: true },
-  ];
+  ], []);
 
   return (
     <Flexbox gap={16}>

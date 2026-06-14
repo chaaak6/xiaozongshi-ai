@@ -19,18 +19,17 @@ const AdminAgentsPage = memo(() => {
     offset: (page - 1) * 20,
   });
 
-  const toggleMutation = lambdaQuery.adminAgent.toggleEnabled.useMutation({
+  const toggleMutation = lambdaQuery.adminAgent.togglePinned.useMutation({
     onSuccess: () => { message.success(t('agents.toggleSuccess')); refetch(); },
   });
 
   const columns = [
-    { title: t('agents.name'), dataIndex: 'name', key: 'name' },
+    { title: t('agents.name'), dataIndex: 'title', key: 'title', render: (v: string) => v || '(未命名)' },
+    { title: 'Provider', dataIndex: 'provider', key: 'provider', render: (v: string) => v ? <Tag>{v}</Tag> : '-' },
     { title: t('agents.model'), dataIndex: 'model', key: 'model' },
-    { title: t('agents.category'), dataIndex: 'category', key: 'category', render: (v: string) => v ? <Tag>{v}</Tag> : '-' },
-    {
-      title: t('agents.enabled'), dataIndex: 'enabled', key: 'enabled',
+    { title: t('agents.enabled'), dataIndex: 'pinned', key: 'pinned',
       render: (v: boolean, record: any) => (
-        <Switch checked={v} onChange={(checked) => toggleMutation.mutate({ agentId: record.id, enabled: checked })} />
+        <Switch checked={!!v} onChange={(checked) => toggleMutation.mutate({ agentId: record.id, pinned: checked })} />
       ),
     },
   ];

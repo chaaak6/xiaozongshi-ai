@@ -1,6 +1,7 @@
 import { and, desc, eq, gte, lte } from 'drizzle-orm';
 import { z } from 'zod';
 
+import { auditLogs } from '@/database/schemas/auditLog';
 import { authedProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
 import { withRbacPermission } from '@/business/server/trpc-middlewares/rbacPermission';
@@ -26,19 +27,19 @@ export const auditLogRouter = router({
 
       const conditions: ReturnType<typeof eq>[] = [];
 
-      if (userId) conditions.push(eq(serverDB.auditLogs.userId, userId));
-      if (category) conditions.push(eq(serverDB.auditLogs.category, category));
-      if (action) conditions.push(eq(serverDB.auditLogs.action, action));
-      if (startDate) conditions.push(gte(serverDB.auditLogs.createdAt, new Date(startDate)));
-      if (endDate) conditions.push(lte(serverDB.auditLogs.createdAt, new Date(endDate)));
+      if (userId) conditions.push(eq(auditLogs.userId, userId));
+      if (category) conditions.push(eq(auditLogs.category, category));
+      if (action) conditions.push(eq(auditLogs.action, action));
+      if (startDate) conditions.push(gte(auditLogs.createdAt, new Date(startDate)));
+      if (endDate) conditions.push(lte(auditLogs.createdAt, new Date(endDate)));
 
       const where = conditions.length > 0 ? and(...conditions) : undefined;
 
       const data = await serverDB
         .select()
-        .from(serverDB.auditLogs)
+        .from(auditLogs)
         .where(where)
-        .orderBy(desc(serverDB.auditLogs.createdAt))
+        .orderBy(desc(auditLogs.createdAt))
         .limit(limit)
         .offset(offset);
 

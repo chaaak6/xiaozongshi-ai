@@ -1,4 +1,7 @@
+import { desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
+
+import { agents } from '@/database/schemas/agent';
 import { authedProcedure, router } from '@/libs/trpc/lambda';
 import { serverDatabase } from '@/libs/trpc/lambda/middleware';
 import { withRbacPermission } from '@/business/server/trpc-middlewares/rbacPermission';
@@ -15,18 +18,16 @@ export const adminAgentRouter = router({
     }))
     .query(async ({ ctx, input }) => {
       const { serverDB } = ctx;
-      const { agents, users } = serverDB;
-      const { eq, ilike, desc, count, sql } = await import('drizzle-orm');
 
-      // 简化：直接查询 agents 表
       const data = await serverDB.select({
         id: agents.id,
-        name: agents.name,
+        title: agents.title,
         model: agents.model,
-        category: agents.category,
-        enabled: agents.enabled,
+        provider: agents.provider,
+        description: agents.description,
         createdAt: agents.createdAt,
         userId: agents.userId,
+        pinned: agents.pinned,
       })
       .from(agents)
       .orderBy(desc(agents.createdAt))
@@ -36,19 +37,17 @@ export const adminAgentRouter = router({
       return { data, total: data.length };
     }),
 
-  /** 管理员启用/禁用智能体 */
-  toggleEnabled: agentAdminProcedure
+  /** 管理员置顶/取消置顶智能体 */
+  togglePinned: agentAdminProcedure
     .input(z.object({
       agentId: z.string(),
-      enabled: z.boolean(),
+      pinned: z.boolean(),
     }))
     .mutation(async ({ ctx, input }) => {
       const { serverDB } = ctx;
-      const { agents } = serverDB;
-      const { eq } = await import('drizzle-orm');
 
       await serverDB.update(agents)
-        .set({ enabled: input.enabled })
+        .set({ pinned: input.pinned })
         .where(eq(agents.id, input.agentId));
 
       return { success: true };

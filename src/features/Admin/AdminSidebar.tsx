@@ -10,6 +10,7 @@ const menuItems = [
   { key: '/admin', icon: '📊', labelKey: 'dashboard' },
   { key: '/admin/sessions', icon: '💬', labelKey: 'sessions' },
   { key: '/admin/agents', icon: '🤖', labelKey: 'agents' },
+  { key: '/admin/providers', icon: '🔑', labelKey: 'providers' },
   { key: '/admin/plugins', icon: '🔌', labelKey: 'plugins' },
   { key: '/admin/knowledge', icon: '📚', labelKey: 'knowledge' },
   { key: '/admin/users', icon: '👥', labelKey: 'users' },

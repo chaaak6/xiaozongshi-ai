@@ -61,7 +61,6 @@ export const adminRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const { serverDB } = ctx;
-      const { sessions, users } = serverDB;
 
       let conditions = [];
       if (input.userId) {
@@ -115,7 +114,6 @@ export const adminRouter = router({
     .input(z.object({ sessionId: z.string() }))
     .query(async ({ ctx, input }) => {
       const { serverDB } = ctx;
-      const { messages } = serverDB;
 
       const data = await serverDB
         .select()
@@ -138,7 +136,6 @@ export const adminRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const { serverDB } = ctx;
-      const { users } = serverDB;
 
       let conditions = [];
       if (input.search) {

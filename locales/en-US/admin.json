@@ -3,6 +3,7 @@
   "menu.dashboard": "Dashboard",
   "menu.sessions": "Sessions",
   "menu.agents": "Agents",
+  "menu.providers": "AI Providers",
   "menu.plugins": "Plugins",
   "menu.knowledge": "Knowledge Base",
   "menu.users": "Users",
