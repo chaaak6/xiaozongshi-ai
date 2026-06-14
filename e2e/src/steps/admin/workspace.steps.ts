@@ -115,3 +115,33 @@ Then('应该显示邀请发送成功提示', async function(this:CustomWorld){
   await this.page.waitForTimeout(1000);
   try { await expect(this.page.locator('.ant-message-success').first()).toBeVisible({timeout:5000}); } catch {}
 });
+
+When('用户点击 创建工作区按钮', async function(this:CustomWorld){
+  await this.page.waitForTimeout(500);
+  const btn=this.page.locator('button').filter({hasText:/创建/}).first();
+  if(await btn.count()>0) await btn.click({force:true});
+  await this.page.waitForTimeout(1000);
+});
+
+When('用户点击邀请成员按钮', async function(this:CustomWorld){
+  await this.page.locator('button').filter({hasText:/添加|邀请/}).first().click({force:true});
+  await this.page.waitForTimeout(1000);
+});
+
+When('用户在工作区选择角色 {string}', async function(this:CustomWorld,role:string){
+  await this.page.locator('.ant-select').first().click();
+  await this.page.waitForTimeout(500);
+  await this.page.locator('.ant-select-item').filter({hasText:role}).first().click();
+  await this.page.waitForTimeout(500);
+});
+
+When('用户点击模型白名单标签', async function(this:CustomWorld){
+  await this.page.locator('.ant-tabs-tab').filter({hasText:/模型|白名单/}).first().click({force:true});
+  await this.page.waitForTimeout(1000);
+});
+
+When('用户点击保存配置', async function(this:CustomWorld){
+  const btn=this.page.locator('button').filter({hasText:/保存/}).first();
+  if(await btn.count()>0) await btn.click({force:true});
+  await this.page.waitForTimeout(1000);
+});
