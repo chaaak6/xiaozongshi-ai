@@ -11,7 +11,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/lobechat
       - DATABASE_DRIVER=node
-      - NEWAPI_PROXY_URL=${NEWAPI_PROXY_URL:-https://your-newapi-server.com}
+      - NEWAPI_PROXY_URL=${NEWAPI_PROXY_URL:-https://aihub.bielcrystal.com}
       - NEWAPI_API_KEY=${NEWAPI_API_KEY:-}
       - AUTH_SECRET=${AUTH_SECRET:-change-me-in-production}
       - AUTH_EMAIL_VERIFICATION=false

@@ -9,7 +9,7 @@ const NewAPI: ModelProviderCard = {
   name: 'AI 中转站',
   settings: {
     proxyUrl: {
-      placeholder: 'https://your-company-newapi.com',
+      placeholder: 'https://aihub.bielcrystal.com',
       desc: '公司内部部署的 New API 中转服务器地址',
       title: '服务器地址',
     },
