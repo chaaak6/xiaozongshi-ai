@@ -6,10 +6,14 @@ import type {
   AdminAuditLog,
   AdminKnowledgeBase,
   AdminMockData,
+  AdminModel,
   AdminRole,
+  AdminRoleDetail,
   AdminSession,
   AdminSessionMessage,
   AdminUser,
+  AdminWorkspace,
+  AdminWorkspaceMember,
   DashboardStats,
 } from './types';
 
@@ -246,6 +250,48 @@ export const mockProviders: AdminProvider[] = [
 ];
 
 // ============================================
+// Models
+// ============================================
+
+export const mockModels: AdminModel[] = [
+  { id: 'openai/gpt-5.5', displayName: 'GPT 5.5', enabled: true, providerId: 'newapi', type: 'chat', contextWindowTokens: 128000 },
+  { id: 'openai/gpt-5.4', displayName: 'GPT 5.4', enabled: true, providerId: 'newapi', type: 'chat', contextWindowTokens: 128000 },
+  { id: 'anthropic/claude-sonnet-4.6', displayName: 'Claude Sonnet 4.6', enabled: true, providerId: 'newapi', type: 'chat', contextWindowTokens: 200000 },
+  { id: 'anthropic/claude-opus-4.7', displayName: 'Claude Opus 4.7', enabled: false, providerId: 'newapi', type: 'chat', contextWindowTokens: 200000 },
+  { id: 'deepseek-v4-pro', displayName: 'DeepSeek V4 Pro', enabled: true, providerId: 'newapi', type: 'chat', contextWindowTokens: 64000 },
+  { id: 'qwen3.7-max', displayName: 'Qwen 3.7 Max', enabled: true, providerId: 'newapi', type: 'chat', contextWindowTokens: 32000 },
+  { id: 'google/gemini-3.1-pro-preview', displayName: 'Gemini 3.1 Pro', enabled: false, providerId: 'newapi', type: 'chat', contextWindowTokens: 1048576 },
+];
+
+// ============================================
+// Workspaces
+// ============================================
+
+export const mockWorkspaces: AdminWorkspace[] = [
+  { id: 'ws-default', name: '默认工作区', description: '系统默认工作区', memberCount: 42, createdAt: '2026-01-01T00:00:00Z', tokenQuota: 5000000 },
+  { id: 'ws-dev', name: '研发部', description: '研发部门专用工作区', memberCount: 15, createdAt: '2026-03-15T00:00:00Z', tokenQuota: 3000000, modelWhitelist: ['openai/gpt-5.5', 'anthropic/claude-sonnet-4.6'] },
+  { id: 'ws-marketing', name: '市场部', description: '市场部门工作区', memberCount: 8, createdAt: '2026-05-01T00:00:00Z', tokenQuota: 1000000 },
+];
+
+export const mockWorkspaceMembers: AdminWorkspaceMember[] = [
+  { id: 'wsm-1', userId: 'u1', userName: '张三', userEmail: 'zhangsan@company.com', role: 'workspace_owner', joinedAt: '2026-03-15T00:00:00Z' },
+  { id: 'wsm-2', userId: 'u2', userName: '李四', userEmail: 'lisi@company.com', role: 'workspace_member', joinedAt: '2026-04-01T00:00:00Z' },
+  { id: 'wsm-3', userId: 'u3', userName: '王五', userEmail: 'wangwu@company.com', role: 'workspace_viewer', joinedAt: '2026-05-10T00:00:00Z' },
+];
+
+// ============================================
+// Role Details (for RBAC page)
+// ============================================
+
+export const mockRoleDetails: AdminRoleDetail[] = [
+  { id: 'role-super-admin', name: 'super_admin', displayName: '超级管理员', isSystem: true, permissions: ['admin:access','audit:read','session:read','user:manage','knowledge_base:manage','agent:manage','plugin:manage','rbac:manage'] },
+  { id: 'role-admin', name: 'admin', displayName: '管理员', isSystem: true, permissions: ['admin:access','audit:read','session:read','user:manage','knowledge_base:manage','agent:manage'] },
+  { id: 'role-ws-owner', name: 'workspace_owner', displayName: '工作空间所有者', isSystem: true, permissions: ['agent:create:all','agent:update:all','knowledge_base:manage','file:upload:all'] },
+  { id: 'role-ws-member', name: 'workspace_member', displayName: '工作空间成员', isSystem: true, permissions: ['agent:create:owner','message:create:owner','file:upload:owner'] },
+  { id: 'role-ws-viewer', name: 'workspace_viewer', displayName: '工作空间查看者', isSystem: true, permissions: [] },
+];
+
+// ============================================
 // Aggregated Mock Data (used by handlers factory)
 // ============================================
 
@@ -254,10 +300,14 @@ export const adminMockData: AdminMockData = {
   auditLogs: mockAuditLogs,
   dashboardStats: mockDashboardStats,
   knowledgeBases: mockKnowledgeBases,
+  models: mockModels,
   permissionCodes: mockPermissionCodes,
   providers: mockProviders,
+  roleDetails: mockRoleDetails,
   roles: mockRoles,
   sessionMessages: mockSessionMessages,
   sessions: mockSessions,
   users: mockUsers,
+  workspaceMembers: mockWorkspaceMembers,
+  workspaces: mockWorkspaces,
 };

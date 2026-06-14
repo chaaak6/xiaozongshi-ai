@@ -5,6 +5,7 @@ import { accountDeletionRouter } from '@/business/server/lambda-routers/accountD
 import { adminAgentRouter } from './adminAgent';
 import { adminPluginRouter } from './adminPlugin';
 import { adminProviderRouter } from './adminProvider';
+import { adminWorkspaceRouter } from './adminWorkspace';
 import { adminRouter } from './admin';
 import { pageShareRouter } from '@/business/server/lambda-routers/pageShare';
 import { referralRouter } from '@/business/server/lambda-routers/referral';
@@ -92,6 +93,7 @@ export const lambdaRouter = router({
   adminAgent: adminAgentRouter,
   adminPlugin: adminPluginRouter,
   adminProvider: adminProviderRouter,
+  adminWorkspace: adminWorkspaceRouter,
   agent: agentRouter,
   auditLog: auditLogRouter,
   agentBotProvider: agentBotProviderRouter,

@@ -124,6 +124,9 @@ import AdminProvidersPage from '@/routes/admin/providers';
 import AdminLayout from '@/routes/admin/_layout';
 import AdminPluginsPage from '@/routes/admin/plugins';
 import AdminRbacPage from '@/routes/admin/rbac';
+import AdminWorkspaceDetailPage from '@/routes/admin/workspaces/[id]';
+import AdminWorkspaceModelsPage from '@/routes/admin/workspaces/[id]/models';
+import AdminWorkspacesPage from '@/routes/admin/workspaces';
 import AdminSessionDetailPage from '@/routes/admin/sessions/[id]';
 import AdminSessionsPage from '@/routes/admin/sessions';
 import AdminUsersPage from '@/routes/admin/users';
@@ -759,6 +762,9 @@ export const desktopRoutes: RouteObject[] = [
       { element: <AdminKnowledgePage />, path: 'knowledge' },
       { element: <AdminUsersPage />, path: 'users' },
       { element: <AdminRbacPage />, path: 'rbac' },
+      { element: <AdminWorkspacesPage />, path: 'workspaces' },
+      { element: <AdminWorkspaceDetailPage />, path: 'workspaces/:id' },
+      { element: <AdminWorkspaceModelsPage />, path: 'workspaces/:id/models' },
     ],
     element: <AdminLayout />,
     errorElement: <ErrorBoundary />,

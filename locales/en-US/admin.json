@@ -8,6 +8,7 @@
   "menu.knowledge": "Knowledge Base",
   "menu.users": "Users",
   "menu.rbac": "RBAC",
+  "menu.workspaces": "Workspaces",
   "stats.totalUsers": "Total Users",
   "stats.totalSessions": "Total Sessions",
   "stats.totalMessages": "Total Messages",
@@ -58,5 +59,19 @@
   "rbac.managePermissions": "Manage Permissions",
   "rbac.editPermissions": "Edit Permissions",
   "rbac.updateSuccess": "Permissions updated",
-  "rbac.system": "System Admin"
+  "rbac.system": "System Admin",
+  "providers.title": "AI Provider Management",
+  "providers.name": "Provider Name",
+  "providers.source": "Source",
+  "providers.apiKey": "API Key",
+  "providers.baseURL": "Base URL",
+  "providers.enabled": "Enabled",
+  "providers.searchPlaceholder": "Search providers...",
+  "providers.unnamed": "(unnamed)",
+  "providers.toggleSuccess": "Provider status updated",
+  "workspaces.title": "Workspace Management",
+  "workspaces.create": "Create Workspace",
+  "workspaces.members": "Members",
+  "workspaces.models": "Model Whitelist",
+  "workspaces.quota": "Quota Settings"
 }

@@ -108,12 +108,16 @@ export interface AdminMockData {
   auditLogs: AdminAuditLog[];
   dashboardStats: DashboardStats;
   knowledgeBases: AdminKnowledgeBase[];
+  models: AdminModel[];
   permissionCodes: string[];
   providers: AdminProvider[];
+  roleDetails: AdminRoleDetail[];
   roles: AdminRole[];
   sessionMessages: AdminSessionMessage[];
   sessions: AdminSession[];
   users: AdminUser[];
+  workspaceMembers: AdminWorkspaceMember[];
+  workspaces: AdminWorkspace[];
 }
 
 // ============================================
@@ -131,4 +135,53 @@ export interface AdminProvider {
   name: string;
   source: string;
   userId: string;
+}
+
+// ============================================
+// Model (for provider model management)
+// ============================================
+
+export interface AdminModel {
+  id: string;
+  displayName: string;
+  enabled: boolean;
+  providerId: string;
+  type: string;
+  contextWindowTokens?: number;
+  abilities?: Record<string, boolean>;
+}
+
+// ============================================
+// Workspace
+// ============================================
+
+export interface AdminWorkspace {
+  id: string;
+  name: string;
+  description: string;
+  memberCount: number;
+  createdAt: string;
+  tokenQuota?: number;
+  modelWhitelist?: string[];
+}
+
+export interface AdminWorkspaceMember {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  role: string;
+  joinedAt: string;
+}
+
+// ============================================
+// RBAC (enhanced)
+// ============================================
+
+export interface AdminRoleDetail {
+  id: string;
+  name: string;
+  displayName: string;
+  isSystem: boolean;
+  permissions: string[];
 }

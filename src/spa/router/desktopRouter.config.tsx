@@ -1004,6 +1004,18 @@ export const desktopRoutes: RouteObject[] = [
         element: dynamicElement(() => import('@/routes/admin/rbac'), 'Desktop > Admin > RBAC'),
         path: 'rbac',
       },
+      {
+        element: dynamicElement(() => import('@/routes/admin/workspaces'), 'Desktop > Admin > Workspaces'),
+        path: 'workspaces',
+      },
+      {
+        element: dynamicElement(() => import('@/routes/admin/workspaces/[id]'), 'Desktop > Admin > Workspace Detail'),
+        path: 'workspaces/:id',
+      },
+      {
+        element: dynamicElement(() => import('@/routes/admin/workspaces/[id]/models'), 'Desktop > Admin > Workspace Models'),
+        path: 'workspaces/:id/models',
+      },
     ],
     element: dynamicLayout(
       () => import('@/routes/admin/_layout'),

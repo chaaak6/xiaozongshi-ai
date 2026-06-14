@@ -8,6 +8,7 @@
   "menu.knowledge": "知识库",
   "menu.users": "用户管理",
   "menu.rbac": "权限管理",
+  "menu.workspaces": "工作区管理",
   "stats.totalUsers": "总用户数",
   "stats.totalSessions": "总会话数",
   "stats.totalMessages": "总消息数",
@@ -67,5 +68,10 @@
   "providers.enabled": "启用",
   "providers.searchPlaceholder": "搜索供应商...",
   "providers.unnamed": "(未命名)",
-  "providers.toggleSuccess": "供应商状态已更新"
+  "providers.toggleSuccess": "供应商状态已更新",
+  "workspaces.title": "工作区管理",
+  "workspaces.create": "创建工作区",
+  "workspaces.members": "成员管理",
+  "workspaces.models": "模型白名单",
+  "workspaces.quota": "配额设置"
 }
