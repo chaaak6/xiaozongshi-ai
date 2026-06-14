@@ -109,8 +109,26 @@ export interface AdminMockData {
   dashboardStats: DashboardStats;
   knowledgeBases: AdminKnowledgeBase[];
   permissionCodes: string[];
+  providers: AdminProvider[];
   roles: AdminRole[];
   sessionMessages: AdminSessionMessage[];
   sessions: AdminSession[];
   users: AdminUser[];
+}
+
+// ============================================
+// Provider
+// ============================================
+
+export interface AdminProvider {
+  checkModel: string | null;
+  createdAt: string;
+  enabled: boolean;
+  hasApiKey: boolean;
+  hasBaseURL: boolean;
+  id: string;
+  keyVaults: undefined;
+  name: string;
+  source: string;
+  userId: string;
 }

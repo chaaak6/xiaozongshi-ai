@@ -235,6 +235,17 @@ export const mockPermissionCodes: string[] = [
 ];
 
 // ============================================
+// Providers
+// ============================================
+
+export const mockProviders: AdminProvider[] = [
+  { id: 'newapi', name: 'AI 中转站', userId: 'u1', enabled: true, source: 'builtin', checkModel: 'gpt-4o-mini', hasApiKey: true, hasBaseURL: true, createdAt: '2026-06-01T00:00:00Z', keyVaults: undefined },
+  { id: 'openai', name: 'OpenAI', userId: 'u1', enabled: true, source: 'builtin', checkModel: null, hasApiKey: false, hasBaseURL: false, createdAt: '2026-06-01T00:00:00Z', keyVaults: undefined },
+  { id: 'anthropic', name: 'Anthropic', userId: 'u1', enabled: true, source: 'builtin', checkModel: null, hasApiKey: false, hasBaseURL: false, createdAt: '2026-06-01T00:00:00Z', keyVaults: undefined },
+  { id: 'deepseek', name: 'DeepSeek', userId: 'u1', enabled: false, source: 'builtin', checkModel: null, hasApiKey: false, hasBaseURL: false, createdAt: '2026-06-01T00:00:00Z', keyVaults: undefined },
+];
+
+// ============================================
 // Aggregated Mock Data (used by handlers factory)
 // ============================================
 
@@ -244,6 +255,7 @@ export const adminMockData: AdminMockData = {
   dashboardStats: mockDashboardStats,
   knowledgeBases: mockKnowledgeBases,
   permissionCodes: mockPermissionCodes,
+  providers: mockProviders,
   roles: mockRoles,
   sessionMessages: mockSessionMessages,
   sessions: mockSessions,

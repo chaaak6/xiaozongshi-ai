@@ -147,5 +147,27 @@ export function createAdminHandlers(mockData: AdminMockData): MockHandler[] {
         }),
       pattern: /\/trpc\/lambda\/auditLog\.query/,
     },
+
+    // --- Admin Providers ---
+    {
+      enabled: true,
+      handler: async (route: Route) =>
+        route.fulfill({
+          body: createTrpcListResponse(mockData.providers || []),
+          contentType: 'application/json',
+          status: 200,
+        }),
+      pattern: /\/trpc\/lambda\/adminProvider\.listAll/,
+    },
+    {
+      enabled: true,
+      handler: async (route: Route) =>
+        route.fulfill({
+          body: createTrpcResponse({ success: true }),
+          contentType: 'application/json',
+          status: 200,
+        }),
+      pattern: /\/trpc\/lambda\/adminProvider\.toggleEnabled/,
+    },
   ];
 }
