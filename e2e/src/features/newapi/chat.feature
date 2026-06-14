@@ -35,7 +35,7 @@ Feature: NewAPI AI 中转站设置
     When 用户打开 NewAPI 供应商设置
     Then 设置页面应该包含 "中转站地址" 输入框
     And 设置页面应该包含 "API Key" 输入框
-    And 输入框占位符应该显示 "https://your-company-newapi.com"
+    And 输入框占位符应该显示 "https://aihub.bielcrystal.com"
 
   @NEWAPI-CHAT-005 @P1 @skip
   Scenario: 连接测试功能

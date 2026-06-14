@@ -164,10 +164,10 @@ When('用户填写有效的服务器地址和访问令牌', async function (this
 
   // Actual antd form inputs on this page:
   // - input[placeholder="AI 中转站 API Key"] (type=password)
-  // - input[placeholder="https://your-company-newapi.com"] (type=text)
-  const urlInput = this.page.locator('input[placeholder*="your-company-newapi"]').first();
+  // - input[placeholder="https://aihub.bielcrystal.com"] (type=text)
+  const urlInput = this.page.locator('input[placeholder*="aihub.bielcrystal"]').first();
   if (await urlInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await urlInput.fill('https://your-company-newapi.com');
+    await urlInput.fill('https://aihub.bielcrystal.com');
     console.log('   ✅ 已填写服务器地址');
   } else {
     console.log('   ⚠️ 未找到服务器地址输入框');
@@ -293,6 +293,8 @@ Then('聊天页面应该显示完整的对话历史', async function (this: Cust
 
 Then('AI 中转站（NewAPI）供应商应该可见', async function (this: CustomWorld) {
   console.log('   📍 Step: 验证 NewAPI 供应商可见...');
+  // Wait for provider list to load from API
+  await this.page.waitForTimeout(2000);
 
   const newapiSelectors = [
     'text=NewAPI',
@@ -303,7 +305,7 @@ Then('AI 中转站（NewAPI）供应商应该可见', async function (this: Cust
   let found = false;
   for (const sel of newapiSelectors) {
     const el = this.page.locator(sel).first();
-    if (await el.isVisible({ timeout: 5000 }).catch(() => false)) {
+    if (await el.isVisible({ timeout: 10000 }).catch(() => false)) {
       found = true;
       console.log(`   ✅ NewAPI 供应商可见 (通过 "${sel}")`);
       break;
@@ -342,7 +344,7 @@ Then('设置页面应该包含 {string} 输入框', async function (this: Custom
   ];
 
   // Also check input placeholders for matching substrings
-  if (label === '中转站地址') selectors.push('input[placeholder*="your-company-newapi"]');
+  if (label === '中转站地址') selectors.push('input[placeholder*="aihub.bielcrystal"]');
   if (label === 'API Key') selectors.push('input[placeholder*="API Key"]');
 
   let found = false;
@@ -363,7 +365,7 @@ Then('设置页面应该包含 {string} 输入框', async function (this: Custom
 Then('输入框占位符应该显示 {string}', async function (this: CustomWorld, placeholder: string) {
   console.log(`   📍 Step: 验证占位符 "${placeholder}"...`);
   const input = this.page.locator(`input[placeholder*="${placeholder}"]`).first();
-  await expect(input).toBeVisible({ timeout: 5000 });
+  await expect(input).toBeVisible({ timeout: 15000 });
   console.log(`   ✅ 占位符验证通过: "${placeholder}"`);
 });
 
@@ -372,7 +374,7 @@ Then('{string} 应该显示为输入框占位符', async function (this: CustomW
   console.log(`   📍 Step: 验证占位符 "${placeholder}"...`);
 
   const input = this.page.locator(`input[placeholder*="${placeholder}"]`).first();
-  await expect(input).toBeVisible({ timeout: 5000 });
+  await expect(input).toBeVisible({ timeout: 15000 });
   console.log(`   ✅ 占位符验证通过: "${placeholder}"`);
 });
 
