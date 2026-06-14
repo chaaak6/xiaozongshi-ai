@@ -74,11 +74,6 @@ When('用户勾选模型 {string} 和 {string}', async function(this:CustomWorld
   await this.page.waitForTimeout(300);
 });
 
-Then('页面标题 {string} 应该可见', async function(this:CustomWorld,title:string){
-  await this.page.waitForTimeout(1000);
-  await expect(this.page.getByText(title,{exact:false}).first()).toBeVisible({timeout:WAIT_TIMEOUT});
-});
-
 Then('工作区列表应该显示至少一个工作区', async function(this:CustomWorld){
   await this.page.waitForTimeout(2000);
   expect(await this.page.locator('tr.ant-table-row').count()).toBeGreaterThan(0);
