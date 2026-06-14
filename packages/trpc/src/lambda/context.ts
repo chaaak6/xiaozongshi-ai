@@ -72,6 +72,7 @@ export interface AuthContext {
   clientIp?: string | null;
   jwtPayload?: ClientSecretPayload | null;
   marketAccessToken?: string;
+  mockDevUser?: boolean;
   // Add OIDC authentication information
   oidcAuth?: OIDCAuth | null;
   resHeaders?: Headers;
@@ -89,6 +90,7 @@ export interface AuthContext {
 export const createContextInner = async (params?: {
   clientIp?: string | null;
   marketAccessToken?: string;
+  mockDevUser?: boolean;
   oidcAuth?: OIDCAuth | null;
   traceContext?: OtContext;
   userAgent?: string;
@@ -102,6 +104,7 @@ export const createContextInner = async (params?: {
   return {
     clientIp: params?.clientIp,
     marketAccessToken: params?.marketAccessToken,
+    mockDevUser: params?.mockDevUser,
     oidcAuth: params?.oidcAuth,
     resHeaders: responseHeaders,
     traceContext: params?.traceContext,
@@ -127,10 +130,7 @@ export const createLambdaContext = async (request: NextRequest): Promise<LambdaC
   if (process.env.NODE_ENV === 'development' && (isDebugApi || isMockUser)) {
     return createContextInner({
       userId: process.env.MOCK_DEV_USER_ID,
-      userPermissions: [
-        'admin:access', 'audit:read', 'session:read', 'user:manage',
-        'knowledge_base:manage', 'agent:manage', 'plugin:manage', 'rbac:manage',
-      ],
+      mockDevUser: true,
     });
   }
 

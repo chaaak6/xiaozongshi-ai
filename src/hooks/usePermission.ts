@@ -7,17 +7,12 @@ interface Permission {
   reason: string;
 }
 
-const ADMIN_PERMISSIONS = [
-  'admin:access', 'audit:read', 'session:read', 'user:manage',
-  'knowledge_base:manage', 'agent:manage', 'plugin:manage', 'rbac:manage',
-];
-
 export const usePermission = (action: string): Permission => {
   const userPermissions = useAiInfraStore((s) => s.userPermissions ?? []);
 
   return useMemo(() => {
-    // E2E mode: grant all admin permissions so tests can access /admin pages
-    if (typeof window !== 'undefined' && (window as any).__E2E__) {
+    // E2E / dev mock user mode: grant all permissions so the editor and controls work
+    if (typeof window !== 'undefined' && ((window as any).__E2E__ || __DEV__)) {
       return { allowed: true, reason: '' };
     }
 

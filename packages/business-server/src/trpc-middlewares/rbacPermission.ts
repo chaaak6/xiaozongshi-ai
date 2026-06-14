@@ -3,10 +3,17 @@ import { TRPCError } from '@trpc/server';
 /**
  * tRPC middleware: checks whether the current user holds a specific permission code.
  * Depends on `ctx.userPermissions` (string array) injected by the checkAuth middleware.
- * In dev mock-user mode, all admin permissions are injected by checkAuth automatically.
+ *
+ * In dev mode with ENABLE_MOCK_DEV_USER=1, ctx.mockDevUser is true and ALL permission
+ * checks are bypassed so the developer can freely test every feature.
  */
+function isMockDevMode(ctx: any): boolean {
+  return !!(ctx.mockDevUser);
+}
+
 export function withRbacPermission(code: string) {
   return async function rbacPermissionMiddleware({ ctx, next }: any) {
+    if (isMockDevMode(ctx)) return next();
     const permissions: string[] = ctx.userPermissions ?? [];
 
     if (!permissions.includes(code)) {
@@ -22,6 +29,7 @@ export function withRbacPermission(code: string) {
 
 export function withAnyRbacPermission(codes: string[]) {
   return async function rbacAnyPermissionMiddleware({ ctx, next }: any) {
+    if (isMockDevMode(ctx)) return next();
     const permissions: string[] = ctx.userPermissions ?? [];
 
     const hasAny = codes.some((code) => permissions.includes(code));
@@ -38,6 +46,7 @@ export function withAnyRbacPermission(codes: string[]) {
 
 export function withAllRbacPermissions(codes: string[]) {
   return async function rbacAllPermissionsMiddleware({ ctx, next }: any) {
+    if (isMockDevMode(ctx)) return next();
     const permissions: string[] = ctx.userPermissions ?? [];
 
     const hasAll = codes.every((code) => permissions.includes(code));
@@ -58,5 +67,8 @@ export function withAllRbacPermissions(codes: string[]) {
  * alongside an owner with the `:all` grant.
  */
 export function withScopedPermission(action: string) {
+  if (typeof action === 'string') {
+    return withAnyRbacPermission([`${action}:all`, `${action}:owner`]);
+  }
   return withAnyRbacPermission([`${action}:all`, `${action}:owner`]);
 }
