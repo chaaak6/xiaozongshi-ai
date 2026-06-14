@@ -348,6 +348,22 @@ const ChatInput = memo<ChatInputProps>(
         : undefined),
     };
 
+    // Dev mode: register a global send dispatcher so Ctrl+Enter always works
+    useEffect(() => {
+      import('@/hooks/useHotkeys/devSendHotkey').then(({ devSendDispatcher }) => {
+        devSendDispatcher.current = () => {
+          const state = useChatInputStore.getState();
+          if (!state.editor || !state.getMarkdownContent()) return;
+          state.handleSendButton?.();
+        };
+      });
+      return () => {
+        import('@/hooks/useHotkeys/devSendHotkey').then(({ devSendDispatcher }) => {
+          devSendDispatcher.current = null;
+        });
+      };
+    }, []);
+
     const defaultContent = (
       <WideScreenContainer
         style={{ position: 'relative', ...(skipScrollMarginWithList ? { marginTop: -12 } : null) }}

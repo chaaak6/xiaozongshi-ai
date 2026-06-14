@@ -38,12 +38,14 @@ import DesktopAutoOidcOnFirstOpen from './DesktopAutoOidcOnFirstOpen';
 import DesktopLayoutContainer from './DesktopLayoutContainer';
 import RegisterHotkeys from './RegisterHotkeys';
 import { styles } from './style';
+import { useDevSendHotkey } from '@/hooks/useHotkeys/devSendHotkey';
 
 const CloudBanner = dynamic(() => import('@/features/AlertBanner/CloudBanner'));
 
 const Layout: FC = () => {
   const { isPWA } = usePlatform();
   const { showCloudPromotion } = useServerConfigStore(featureFlagsSelectors);
+  useDevSendHotkey();
 
   return (
     <HotkeysProvider initiallyActiveScopes={[HotkeyScopeEnum.Global]}>
