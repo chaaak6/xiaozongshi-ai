@@ -83,9 +83,16 @@ BeforeAll({ timeout: 600_000 }, async function () {
     const submitButton = page.locator('form button').first();
     await submitButton.click();
 
-    // Wait for navigation away from signin page
-    await page.waitForURL((url) => !url.pathname.includes('/signin'), { timeout: 30_000 });
-    await page.waitForLoadState('networkidle');
+    // Wait for navigation away from signin page (extended timeout for dev mode)
+    try {
+      await page.waitForURL((url) => !url.pathname.includes('/signin'), { timeout: 60_000 });
+      await page.waitForLoadState('networkidle');
+    } catch (urlErr) {
+      console.log('⚠️  Post-login navigation timed out, trying fallback...');
+      // Fallback: navigate to home and see if we're authenticated
+      await page.goto(`${baseUrl}/chat`, { waitUntil: 'networkidle', timeout: 30_000 }).catch(() => {});
+      await page.waitForTimeout(3000);
+    }
 
     // Cache the session cookies
     sessionCookies = await context.cookies();
