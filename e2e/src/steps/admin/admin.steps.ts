@@ -52,15 +52,29 @@ async function assertPageTitle(
   console.log(`   📍 Step: 验证页面标题 "${title}" 可见...`);
   await this.page.waitForTimeout(500);
 
-  // Playwright getByText matches any visible element containing the exact text
-  const titleLocator = this.page.getByText(title, { exact: false }).first();
+  // antd Breadcrumb + Title renders "管理后台" as plain text in multiple places.
+  // Try heading first, then fall back to getByText with longer timeout.
+  const titleLocator = this.page.locator([
+    `h3:has-text("${title}")`,
+    `h1:has-text("${title}")`,
+    `h2:has-text("${title}")`,
+    `.ant-typography:has-text("${title}")`,
+  ].join(', ')).first();
+
+  const fallbackLocator = this.page.getByText(title, { exact: false }).first();
 
   try {
     await expect(titleLocator).toBeVisible({ timeout: WAIT_TIMEOUT });
     console.log(`   ✅ 页面标题 "${title}" 可见`);
   } catch {
-    await this.takeScreenshot(`title-not-found-${title}`);
-    throw new Error(`页面标题 "${title}" 未找到`);
+    // Fallback: try getByText with longer timeout
+    try {
+      await expect(fallbackLocator).toBeVisible({ timeout: WAIT_TIMEOUT + 5000 });
+      console.log(`   ✅ 页面标题 "${title}" 可见 (fallback)`);
+    } catch {
+      await this.takeScreenshot(`title-not-found-${title}`);
+      throw new Error(`页面标题 "${title}" 未找到`);
+    }
   }
 }
 
