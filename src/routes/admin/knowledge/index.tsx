@@ -22,25 +22,13 @@ const AdminKnowledgePage = memo(() => {
     offset: (page - 1) * 20,
   });
 
+  const createMutation = lambdaQuery.knowledgeBaseAdmin.createKnowledgeBase.useMutation({
+    onSuccess: () => { message.success('知识库已创建'); setCreateOpen(false); form.resetFields(); refetch(); },
+  });
+
   const createKnowledgeBase = useCallback((values: any) => {
-    // Use REST fallback until tRPC mutation is available client-side
-    fetch('/api/knowledge/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(values),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error('创建失败');
-        return res.json();
-      })
-      .then(() => {
-        message.success('知识库已创建');
-        setCreateOpen(false);
-        form.resetFields();
-        refetch();
-      })
-      .catch(() => message.error('创建失败'));
-  }, [form, refetch]);
+    createMutation.mutate(values);
+  }, [createMutation]);
 
   const grantMutation = lambdaQuery.knowledgeBaseAdmin.grantPermission.useMutation({
     onSuccess: () => {

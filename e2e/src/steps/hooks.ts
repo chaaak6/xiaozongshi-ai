@@ -59,10 +59,13 @@ Before(async function (this: CustomWorld, { pickle }) {
   console.log(`\n📝 Running: ${pickle.name}${testId ? ` (${testId.name.replace('@', '')})` : ''}`);
 
   // Setup Admin API mocks when @admin tag is present
+  const isCrudTest = pickle.tags.some((tag) => tag.name.startsWith('@crud'));
   const isAdminTest = pickle.tags.some((tag) => tag.name.startsWith('@admin'));
-  if (isAdminTest) {
+  if (isAdminTest && !isCrudTest) {
     await mockManager.setup(this.page);
     console.log('   🔧 Admin mocks enabled');
+  } else if (isCrudTest) {
+    console.log('   🚫 CRUD test — mocks disabled, using real tRPC');
   }
 
   // Setup NewAPI LLM mocks when @newapi tag is present
