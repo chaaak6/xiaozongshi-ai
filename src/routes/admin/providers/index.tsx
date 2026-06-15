@@ -55,6 +55,10 @@ const AdminProvidersPage = memo(() => {
       render: (v: boolean) => <Tag color={v ? 'green' : 'default'}>{v ? '已配置' : '默认'}</Tag>,
     },
     {
+      title: '客户端可见', dataIndex: 'enabled', key: 'visible', width: 100,
+      render: (v: boolean) => <Tag color={v ? 'green' : 'default'}>{v ? '可见' : '隐藏'}</Tag>,
+    },
+    {
       title: t('providers.enabled'), dataIndex: 'enabled', key: 'enabled',
       render: (v: boolean, record: any) => (
         <Switch
