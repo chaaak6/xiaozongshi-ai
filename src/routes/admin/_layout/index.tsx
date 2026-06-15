@@ -1,13 +1,10 @@
 'use client';
 
-import { Layout } from 'antd';
 import { memo } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 
 import AdminSidebar from '@/features/Admin/AdminSidebar';
 import { usePermission } from '@/hooks/usePermission';
-
-const { Sider, Content } = Layout;
 
 const AdminLayout = memo(() => {
   const { allowed } = usePermission('admin:access');
@@ -17,21 +14,27 @@ const AdminLayout = memo(() => {
   }
 
   return (
-    <Layout style={{ height: '100%' }}>
-      <Sider
-        width={220}
-        breakpoint="lg"
-        collapsedWidth={60}
-        style={{ background: 'var(--colorBgContainer)' }}
+    <div style={{ display: 'flex', height: '100%' }}>
+      {/* Sidebar */}
+      <aside
+        style={{
+          background: 'var(--colorBgContainer)',
+          borderRight: '1px solid var(--colorBorderSecondary)',
+          flexShrink: 0,
+          minWidth: 220,
+          width: 220,
+        }}
       >
         <AdminSidebar />
-      </Sider>
-      <Content style={{ overflow: 'auto' }}>
+      </aside>
+
+      {/* Content */}
+      <main style={{ flex: 1, overflow: 'auto', minWidth: 0 }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '16px 24px' }}>
           <Outlet />
         </div>
-      </Content>
-    </Layout>
+      </main>
+    </div>
   );
 });
 
