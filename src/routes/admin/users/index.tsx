@@ -1,13 +1,15 @@
 'use client';
 
 import { Flexbox } from '@lobehub/ui';
-import { Table, Tag, Form, Input, Select, Popconfirm, message, Button, Space } from 'antd';
+import { Table, Tag, Checkbox, Typography, Form, Input, Select, Popconfirm, message, Button, Space } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { memo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AdminPageHeader, AdminFilterBar, AdminCreateModal, AdminEditDrawer, AdminEmptyState } from '@/features/Admin/components';
 import { lambdaQuery } from '@/libs/trpc/client';
+
+const { Text } = Typography;
 
 const AdminUsersPage = memo(() => {
   const { t } = useTranslation('admin');
@@ -17,6 +19,9 @@ const AdminUsersPage = memo(() => {
   const [editingUser, setEditingUser] = useState<any>(null);
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
+  const [orgView, setOrgView] = useState(false);
+
+  const { data: workspaces } = lambdaQuery.adminWorkspace.listAll.useQuery({ limit: 50, offset: 0 });
 
   const { data, isLoading, refetch } = lambdaQuery.admin.listUsers.useQuery({
     search: search || undefined, limit: 20, offset: (page - 1) * 20,
@@ -51,7 +56,7 @@ const AdminUsersPage = memo(() => {
       render: (_: any, record: any) => (
         <Space size="small">
           <Button type="link" size="small" icon={<EditOutlined />}
-            onClick={() => { setEditingUser(record); editForm.setFieldsValue({ fullName: record.name, email: record.email }); }}>
+            onClick={() => { setEditingUser(record); editForm.setFieldsValue({ fullName: record.name, email: record.email, status: record.status, roles: record.roles }); }}>
             编辑
           </Button>
           <Popconfirm title="确认删除此用户？" onConfirm={() => deleteMutation.mutate({ id: record.id })}>
@@ -73,7 +78,21 @@ const AdminUsersPage = memo(() => {
         onSearchChange={setSearch}
         createButtonText="创建用户"
         onCreate={() => { setCreateOpen(true); form.resetFields(); }}
+        extra={<Button onClick={() => setOrgView(!orgView)}>{orgView ? '隐藏' : '显示'}组织架构</Button>}
       />
+      {/* 组织架构面板 */}
+      {orgView && workspaces?.data && (
+        <div style={{ marginBottom: 16, padding: 16, background: 'var(--colorFillQuaternary)', borderRadius: 8 }}>
+          <Text style={{ fontSize: 14, fontWeight: 600, marginBottom: 8, display: 'block' }}>组织架构</Text>
+          {workspaces.data.map((ws: any) => (
+            <div key={ws.id} style={{ marginBottom: 4 }}>
+              <Tag color="blue">🏢 {ws.name}</Tag>
+              <Text style={{ fontSize: 12, color: 'var(--colorTextSecondary)' }}> {ws.memberCount} 人</Text>
+            </div>
+          ))}
+        </div>
+      )}
+
       {!isLoading && users.length === 0 ? (
         <AdminEmptyState description="暂无用户" createButtonText="创建用户" onCreate={() => setCreateOpen(true)} />
       ) : (
@@ -118,6 +137,15 @@ const AdminUsersPage = memo(() => {
           </Form.Item>
           <Form.Item name="status" label="状态">
             <Select options={[{ value: 'active', label: '正常' }, { value: 'disabled', label: '禁用' }]} />
+          </Form.Item>
+          <Form.Item name="roles" label="角色分配">
+            <Checkbox.Group options={[
+              { value: 'super_admin', label: '超级管理员' },
+              { value: 'admin', label: '管理员' },
+              { value: 'workspace_owner', label: '工作空间所有者' },
+              { value: 'workspace_member', label: '工作空间成员' },
+              { value: 'workspace_viewer', label: '工作空间查看者' },
+            ]} />
           </Form.Item>
         </Form>
       </AdminEditDrawer>
