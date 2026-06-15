@@ -8,6 +8,7 @@
   "menu.knowledge": "知识库",
   "menu.users": "用户管理",
   "menu.rbac": "权限管理",
+  "menu.audit": "审计日志",
   "menu.workspaces": "工作区管理",
   "stats.totalUsers": "总用户数",
   "stats.totalSessions": "总会话数",
@@ -73,5 +74,7 @@
   "workspaces.create": "创建工作区",
   "workspaces.members": "成员管理",
   "workspaces.models": "模型白名单",
-  "workspaces.quota": "配额设置"
+  "workspaces.quota": "配额设置",
+  "audit.title": "审计日志",
+  "audit.search": "搜索操作..."
 }

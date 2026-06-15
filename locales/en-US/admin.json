@@ -8,6 +8,7 @@
   "menu.knowledge": "Knowledge Base",
   "menu.users": "Users",
   "menu.rbac": "RBAC",
+  "menu.audit": "Audit Log",
   "menu.workspaces": "Workspaces",
   "stats.totalUsers": "Total Users",
   "stats.totalSessions": "Total Sessions",
@@ -73,5 +74,7 @@
   "workspaces.create": "Create Workspace",
   "workspaces.members": "Members",
   "workspaces.models": "Model Whitelist",
-  "workspaces.quota": "Quota Settings"
+  "workspaces.quota": "Quota Settings",
+  "audit.title": "Audit Log",
+  "audit.search": "Search operations..."
 }
