@@ -1,48 +1,62 @@
 'use client';
 
-import { Flexbox, Text } from '@lobehub/ui';
-import { SearchBar } from '@lobehub/ui';
-import { Table } from 'antd';
 import { memo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Flexbox } from '@lobehub/ui';
+import { Table, DatePicker } from 'antd';
 import { useNavigate } from 'react-router-dom';
-
+import { AdminPageHeader, AdminFilterBar, AdminEmptyState } from '@/features/Admin/components';
 import { lambdaQuery } from '@/libs/trpc/client';
 
+const { RangePicker } = DatePicker;
+
 const AdminSessionsPage = memo(() => {
-  const { t } = useTranslation('admin');
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const pageSize = 20;
+  const [dateRange, setDateRange] = useState<[string, string] | null>(null);
 
   const { data, isLoading } = lambdaQuery.admin.querySessions.useQuery({
     search: search || undefined,
-    limit: pageSize,
-    offset: (page - 1) * pageSize,
+    limit: 20,
+    offset: (page - 1) * 20,
   });
 
   const columns = [
-    { title: t('sessions.user'), dataIndex: 'user_email', key: 'user_email' },
-    { title: t('sessions.messages'), dataIndex: 'message_count', key: 'message_count' },
-    { title: t('sessions.updatedAt'), dataIndex: 'updated_at', key: 'updated_at', render: (v: string) => new Date(v).toLocaleString('zh-CN') },
+    { title: '用户', dataIndex: 'user_email', key: 'user_email' },
+    { title: '消息数', dataIndex: 'message_count', key: 'message_count' },
+    { title: '更新时间', dataIndex: 'updated_at', key: 'updated_at', render: (v: string) => v ? new Date(v).toLocaleString('zh-CN') : '-' },
   ];
 
+  const sessions = (data?.data ?? []) as any[];
+
   return (
-    <Flexbox gap={16}>
-      <Text style={{ fontSize: 24, fontWeight: 600 }}>{t('sessions.title')}</Text>
-      <SearchBar placeholder={t('sessions.searchPlaceholder')} value={search}
-        onChange={(v: any) => setSearch(v.target?.value ?? v)}
-        style={{ width: 300 }}
+    <Flexbox gap={0}>
+      <AdminPageHeader title="会话存档" breadcrumb={[{ title: '会话管理' }]} />
+      <AdminFilterBar
+        searchPlaceholder="搜索用户邮箱..."
+        searchValue={search}
+        onSearchChange={setSearch}
+        filters={
+          <RangePicker
+            onChange={(dates) => {
+              if (dates?.[0] && dates?.[1]) setDateRange([dates[0].toISOString(), dates[1].toISOString()]);
+              else setDateRange(null);
+            }}
+          />
+        }
       />
-      <Table
-        columns={columns}
-        dataSource={(data?.data ?? []) as any[]}
-        loading={isLoading}
-        onRow={(record: any) => ({ onClick: () => navigate(`/admin/sessions/${record.id}`), style: { cursor: 'pointer' } })}
-        pagination={{ current: page, pageSize, total: data?.total ?? 0, onChange: setPage }}
-        rowKey="id"
-      />
+      {!isLoading && sessions.length === 0 ? (
+        <AdminEmptyState description="暂无会话记录" />
+      ) : (
+        <Table
+          columns={columns}
+          dataSource={sessions}
+          loading={isLoading}
+          onRow={(record: any) => ({ onClick: () => navigate(`/admin/sessions/${record.id}`), style: { cursor: 'pointer' } })}
+          pagination={{ current: page, pageSize: 20, total: data?.total ?? 0, onChange: setPage, showSizeChanger: true, showTotal: (t: number) => `共 ${t} 条` }}
+          rowKey="id"
+        />
+      )}
     </Flexbox>
   );
 });
