@@ -18,7 +18,7 @@ export function AdminPageHeader({ title, breadcrumb = [], extra }: AdminPageHead
         items={[{ title: '管理后台' }, ...breadcrumb.map((b) => ({ title: b.title }))]}
       />
       <Flex justify="space-between" align="center">
-        <Title level={3} style={{ margin: 0 }}>{title}</Title>
+        <Title level={3} style={{ margin: 0, flex: '0 0 auto' }}>{title}</Title>
         <Flex gap={8}>{extra}</Flex>
       </Flex>
     </Flex>
