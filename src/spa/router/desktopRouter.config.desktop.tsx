@@ -121,6 +121,7 @@ import AdminAgentsPage from '@/routes/admin/agents';
 import AdminDashboardPage from '@/routes/admin';
 import AdminKnowledgePage from '@/routes/admin/knowledge';
 import AdminProvidersPage from '@/routes/admin/providers';
+import AdminModelsPage from '@/routes/admin/providers/models';
 import AdminLayout from '@/routes/admin/_layout';
 import AdminPluginsPage from '@/routes/admin/plugins';
 import AdminRbacPage from '@/routes/admin/rbac';
@@ -758,6 +759,7 @@ export const desktopRoutes: RouteObject[] = [
       { element: <AdminSessionDetailPage />, path: 'sessions/:id' },
       { element: <AdminAgentsPage />, path: 'agents' },
       { element: <AdminProvidersPage />, path: 'providers' },
+      { element: <AdminModelsPage />, path: 'providers/models' },
       { element: <AdminPluginsPage />, path: 'plugins' },
       { element: <AdminKnowledgePage />, path: 'knowledge' },
       { element: <AdminUsersPage />, path: 'users' },

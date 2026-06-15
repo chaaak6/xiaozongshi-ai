@@ -983,6 +983,10 @@ export const desktopRoutes: RouteObject[] = [
         path: 'providers',
       },
       {
+        element: dynamicElement(() => import('@/routes/admin/providers/models'), 'Desktop > Admin > Models'),
+        path: 'providers/models',
+      },
+      {
         element: dynamicElement(
           () => import('@/routes/admin/plugins'),
           'Desktop > Admin > Plugins',

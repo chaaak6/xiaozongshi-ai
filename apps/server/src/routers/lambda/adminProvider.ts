@@ -72,4 +72,14 @@ export const adminProviderRouter = router({
 
       return { success: true };
     }),
+
+  /** 管理员列出所有模型 */
+  listModels: providerAdminProcedure
+    .input(z.object({ limit: z.number().min(1).max(200).default(50), offset: z.number().min(0).default(0) }))
+    .query(async ({ ctx, input }) => {
+      const { serverDB } = ctx;
+      const { aiModels } = await import('@/database/schemas/aiInfra');
+      const data = await serverDB.select().from(aiModels).limit(input.limit).offset(input.offset);
+      return { data, total: data.length };
+    }),
 });

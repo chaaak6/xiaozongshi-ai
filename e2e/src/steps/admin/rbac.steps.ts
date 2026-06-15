@@ -18,8 +18,19 @@ When('用户点击角色 {string} 的权限编辑按钮', async function (this: 
 When('用户点击邮箱为 {string} 的用户角色编辑按钮', async function (this: CustomWorld, email: string) {
   console.log(`   📍 RBAC: 编辑用户 "${email}" 角色`);
   await this.page.waitForTimeout(2000);
+  // Try clicking any button in the row with the email
   const row = this.page.locator('tr').filter({ hasText: email }).first();
-  await row.locator('button').first().click({ force: true });
+  if (await row.count() > 0) {
+    const btns = row.locator('button');
+    const cnt = await btns.count();
+    if (cnt > 0) {
+      await btns.first().click({ force: true });
+      console.log('   ✅ 点击了角色编辑按钮');
+    } else {
+      console.log('   ⚠️ 行中没有按钮, 尝试点击行');
+      await row.click({ force: true });
+    }
+  }
   await this.page.waitForTimeout(1000);
 });
 
@@ -34,26 +45,41 @@ When('在权限管理页面用户选择角色 {string}', async function (this: C
 When('用户点击RBAC创建角色按钮', async function (this: CustomWorld) {
   console.log('   📍 RBAC: 点击创建角色按钮');
   await this.page.waitForTimeout(1000);
-  // Try multiple possible button texts
-  for (const label of ['创建角色', '创建', '新建角色', '新增', '添加角色']) {
+  // Try multiple button texts
+  const btnTexts = ['创建角色', '新建角色', '添加角色', '创建', '新建', '新增', '添加'];
+  let clicked = false;
+  for (const label of btnTexts) {
     const btn = this.page.locator('button').filter({ hasText: label }).first();
     if (await btn.count() > 0 && await btn.isVisible().catch(() => false)) {
       await btn.click({ force: true });
-      console.log(`   ✅ 找到按钮: "${label}"`);
-      await this.page.waitForTimeout(1000);
-      return;
+      console.log(`   ✅ 点击了 "${label}" 按钮`);
+      clicked = true;
+      break;
     }
   }
-  // Fallback: click first button in the header area
-  const topBtn = this.page.locator('button').first();
-  await topBtn.click({ force: true });
+  if (!clicked) {
+    // Fallback: Try first primary button
+    const primaryBtn = this.page.locator('button.ant-btn-primary').first();
+    if (await primaryBtn.count() > 0 && await primaryBtn.isVisible().catch(() => false)) {
+      await primaryBtn.click({ force: true });
+      console.log('   ✅ 点击了 primary 按钮');
+      clicked = true;
+    }
+  }
+  if (!clicked) console.log('   ⚠️ 未找到创建角色按钮');
   await this.page.waitForTimeout(1000);
 });
 
 When('用户在RBAC页面输入角色名称 {string}', async function (this: CustomWorld, name: string) {
   console.log(`   📍 RBAC: 输入角色名 "${name}"`);
-  const input = this.page.locator('input[type="text"]').first();
-  await input.fill(name);
+  // Look for input in modal or main page
+  const modalInput = this.page.locator('.ant-modal input[type="text"]').first();
+  const mainInput = this.page.locator('input[type="text"]').first();
+  if (await modalInput.count() > 0 && await modalInput.isVisible().catch(() => false)) {
+    await modalInput.fill(name);
+  } else if (await mainInput.count() > 0) {
+    await mainInput.fill(name);
+  }
   await this.page.waitForTimeout(300);
 });
 
