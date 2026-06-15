@@ -177,4 +177,46 @@ export const adminRouter = router({
         total: Number(totalRow?.count ?? 0),
       };
     }),
+
+  /** 创建用户 */
+  createUser: adminProcedure
+    .input(z.object({
+      email: z.string().email(),
+      fullName: z.string().min(1).max(100),
+      password: z.string().min(8),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { serverDB } = ctx;
+      const id = 'user_' + Date.now().toString(36);
+      await serverDB.insert(users).values({
+        id,
+        email: input.email,
+        fullName: input.fullName,
+      });
+      return { id };
+    }),
+
+  /** 更新用户 */
+  updateUser: adminProcedure
+    .input(z.object({
+      id: z.string(),
+      fullName: z.string().min(1).max(100).optional(),
+      email: z.string().email().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { serverDB } = ctx;
+      const { id, ...fields } = input;
+      if (Object.keys(fields).length === 0) return { success: true };
+      await serverDB.update(users).set(fields).where(eq(users.id, id));
+      return { success: true };
+    }),
+
+  /** 删除用户 */
+  deleteUser: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { serverDB } = ctx;
+      await serverDB.delete(users).where(eq(users.id, input.id));
+      return { success: true };
+    }),
 });
