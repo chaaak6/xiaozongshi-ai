@@ -678,8 +678,8 @@ Then(
   '统计卡片 {string} 应该显示',
   async function (this: CustomWorld, cardName: string) {
     console.log(`   📍 Step: 验证统计卡片 "${cardName}" 显示...`);
-
-    const cardLocator = this.page.getByText(cardName, { exact: false }).first();
+    // Stats cards use @lobehub/ui Text component — look for the label text anywhere
+    const cardLocator = this.page.locator(`:text-is("${cardName}"), :has-text("${cardName}")`).first();
 
     try {
       await expect(cardLocator).toBeVisible({ timeout: WAIT_TIMEOUT });
