@@ -1,6 +1,6 @@
 'use client';
 
-import { Flexbox } from '@lobehub/ui';
+import { Flexbox, Text } from '@lobehub/ui';
 import { Switch, Table, Tag, message, Button, Space } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { memo, useState } from 'react';
@@ -29,9 +29,12 @@ const AdminAgentsPage = memo(() => {
     { title: t('agents.name'), dataIndex: 'title', key: 'title', render: (v: string) => v || '(未命名)' },
     { title: 'Provider', dataIndex: 'provider', key: 'provider', render: (v: string) => v ? <Tag>{v}</Tag> : '-' },
     { title: t('agents.model'), dataIndex: 'model', key: 'model' },
-    { title: t('agents.enabled'), dataIndex: 'pinned', key: 'pinned', width: 100,
+    { title: '所属用户', dataIndex: 'userId', key: 'userId', width: 120,
+      render: (v: string) => <Text type="secondary" style={{ fontSize: 12 }}>{v?.substring(0, 12) + '...'}</Text> },
+    { title: '客户端置顶', dataIndex: 'pinned', key: 'pinned', width: 110,
       render: (v: boolean, record: any) => (
-        <Switch checked={!!v} onChange={(checked) => toggleMutation.mutate({ agentId: record.id, pinned: checked })} />
+        <Switch checked={!!v} checkedChildren="是" unCheckedChildren="否"
+          onChange={(checked) => toggleMutation.mutate({ agentId: record.id, pinned: checked })} />
       ),
     },
     {
