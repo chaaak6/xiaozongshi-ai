@@ -196,4 +196,39 @@ export const adminWorkspaceRouter = router({
 
       return { success: true };
     }),
+
+  /** 更新工作区 */
+  update: wsAdminProcedure
+    .input(z.object({
+      id: z.string(),
+      name: z.string().min(1).max(100).optional(),
+      description: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { serverDB } = ctx;
+      const { id, ...fields } = input;
+      if (Object.keys(fields).length === 0) return { success: true };
+      await serverDB.update(workspaces).set(fields).where(eq(workspaces.id, id));
+      return { success: true };
+    }),
+
+  /** 删除工作区 */
+  delete: wsAdminProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { serverDB } = ctx;
+      await serverDB.delete(workspaces).where(eq(workspaces.id, input.id));
+      return { success: true };
+    }),
+
+  /** 移除成员 */
+  removeMember: wsAdminProcedure
+    .input(z.object({ workspaceId: z.string(), userId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { serverDB } = ctx;
+      await serverDB.delete(workspaceMembers).where(
+        and(eq(workspaceMembers.workspaceId, input.workspaceId), eq(workspaceMembers.userId, input.userId))
+      );
+      return { success: true };
+    }),
 });

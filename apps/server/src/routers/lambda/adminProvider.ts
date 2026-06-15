@@ -82,4 +82,24 @@ export const adminProviderRouter = router({
       const data = await serverDB.select().from(aiModels).limit(input.limit).offset(input.offset);
       return { data, total: data.length };
     }),
+
+  /** 更新供应商配置（API Key / 代理地址） */
+  update: providerAdminProcedure
+    .input(z.object({
+      providerId: z.string(),
+      userId: z.string(),
+      apiKey: z.string().optional(),
+      baseURL: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { serverDB } = ctx;
+      const keyVaults: any = {};
+      if (input.apiKey !== undefined) keyVaults.apiKey = input.apiKey;
+      if (input.baseURL !== undefined) keyVaults.baseURL = input.baseURL;
+      if (Object.keys(keyVaults).length === 0) return { success: true };
+      await serverDB.update(aiProviders).set({ keyVaults }).where(
+        sql`${aiProviders.id} = ${input.providerId} AND ${aiProviders.userId} = ${input.userId}`
+      );
+      return { success: true };
+    }),
 });
