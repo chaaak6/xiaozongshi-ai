@@ -1,79 +1,68 @@
 'use client';
 
-import { Flexbox, Text } from '@lobehub/ui';
-import { SearchBar } from '@lobehub/ui';
-import { Button, Modal, Select, Table, Tag, message } from 'antd';
 import { memo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-
+import { Flexbox } from '@lobehub/ui';
+import { Table, Tag, Button, Space, Descriptions } from 'antd';
+import { AdminPageHeader, AdminFilterBar, AdminEditDrawer, AdminEmptyState } from '@/features/Admin/components';
 import { lambdaQuery } from '@/libs/trpc/client';
 
 const AdminKnowledgePage = memo(() => {
-  const { t } = useTranslation('admin');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [permModalOpen, setPermModalOpen] = useState(false);
-  const [selectedKB, setSelectedKB] = useState<string | null>(null);
-  const [grantType, setGrantType] = useState<'user' | 'role'>('user');
-  const [grantTarget, setGrantTarget] = useState('');
-  const [accessLevel, setAccessLevel] = useState<'read' | 'write' | 'admin'>('read');
+  const [selectedKB, setSelectedKB] = useState<any>(null);
 
-  const { data, isLoading, refetch } = lambdaQuery.knowledgeBaseAdmin.listAll.useQuery({
+  const { data, isLoading } = lambdaQuery.knowledgeBaseAdmin.listAll.useQuery({
     search: search || undefined,
     limit: 20,
     offset: (page - 1) * 20,
   });
 
-  const grantMutation = lambdaQuery.knowledgeBaseAdmin.grantPermission.useMutation({
-    onSuccess: () => { message.success(t('knowledge.grantSuccess')); refetch(); setPermModalOpen(false); },
-  });
-
-  const revokeMutation = lambdaQuery.knowledgeBaseAdmin.revokePermission.useMutation({
-    onSuccess: () => { message.success(t('knowledge.revokeSuccess')); refetch(); },
-  });
-
   const columns: any[] = [
-    { title: t('knowledge.name'), dataIndex: 'name', key: 'name' },
+    { title: '名称', dataIndex: 'name', key: 'name' },
     {
-      title: t('knowledge.visibility'), dataIndex: 'visibility', key: 'visibility',
-      render: (v: string) => <Tag color={v === 'workspace' ? 'green' : 'orange'}>{v}</Tag>,
+      title: '可见性', dataIndex: 'visibility', key: 'visibility',
+      render: (v: string) => <Tag color={v === 'workspace' ? 'green' : 'orange'}>{v ?? '-'}</Tag>,
     },
+    { title: '创建时间', dataIndex: 'createdAt', key: 'createdAt', width: 180,
+      render: (v: string) => v ? new Date(v).toLocaleString('zh-CN') : '-' },
     {
-      title: '操作', key: 'actions',
+      title: '操作', key: 'actions', width: 120,
       render: (_: any, record: any) => (
-        <Button size="small" onClick={() => { setSelectedKB(record.id); setPermModalOpen(true); }}>
-          {t('knowledge.permissions')}
-        </Button>
+        <Space size="small">
+          <Button type="link" size="small" onClick={() => setSelectedKB(record)}>详情</Button>
+        </Space>
       ),
     },
   ];
 
-  return (
-    <Flexbox gap={16}>
-      <Text style={{ fontSize: 24, fontWeight: 600 }}>{t('knowledge.title')}</Text>
-      <SearchBar placeholder={t('knowledge.searchPlaceholder')} value={search}
-        onChange={(v: any) => setSearch(v.target?.value ?? v)} style={{ width: 300 }}
-      />
-      <Table columns={columns} dataSource={(data?.data ?? []) as any[]} loading={isLoading}
-        onRow={(record: any) => ({ onClick: () => { setSelectedKB(record.id); setPermModalOpen(true); }, style: { cursor: 'pointer' } })}
-        pagination={{ current: page, pageSize: 20, total: data?.total ?? 0, onChange: setPage }} rowKey="id"
-      />
+  const kbs = (data?.data ?? []) as any[];
 
-      <Modal open={permModalOpen} title={t('knowledge.permissions')} onCancel={() => setPermModalOpen(false)}
-        onOk={() => grantMutation.mutate({ knowledgeBaseId: selectedKB!, granteeType: grantType, granteeId: grantTarget, accessLevel })}
-      >
-        <Flexbox gap={12}>
-          <Select options={[{ value: 'user', label: t('knowledge.user') }, { value: 'role', label: t('knowledge.role') }]}
-            value={grantType} onChange={setGrantType} style={{ width: '100%' }}
-          />
-          <input placeholder="ID" value={grantTarget} onChange={e => setGrantTarget(e.target.value)}
-            style={{ padding: 8, borderRadius: 6, border: '1px solid var(--colorBorder)' }}
-          />
-          <Select options={[{ value: 'read', label: 'Read' }, { value: 'write', label: 'Write' }, { value: 'admin', label: 'Admin' }]}
-            value={accessLevel} onChange={setAccessLevel} style={{ width: '100%' }}
-          />
-        </Flexbox>
-      </Modal>
+  return (
+    <Flexbox gap={0}>
+      <AdminPageHeader title="知识库管理" breadcrumb={[{ title: '知识库' }]} />
+      <AdminFilterBar
+        searchPlaceholder="搜索知识库名称..."
+        searchValue={search}
+        onSearchChange={setSearch}
+      />
+      {!isLoading && kbs.length === 0 ? (
+        <AdminEmptyState description="暂无知识库" />
+      ) : (
+        <Table columns={columns} dataSource={kbs} loading={isLoading} rowKey="id"
+          pagination={{ current: page, pageSize: 20, total: data?.total ?? 0, onChange: setPage, showSizeChanger: true, showTotal: (t: number) => `共 ${t} 条` }} />
+      )}
+      <AdminEditDrawer open={!!selectedKB} title={`知识库详情 — ${selectedKB?.name || ''}`} onClose={() => setSelectedKB(null)} width={560}>
+        <Descriptions column={1} bordered size="small">
+          <Descriptions.Item label="ID">{selectedKB?.id}</Descriptions.Item>
+          <Descriptions.Item label="名称">{selectedKB?.name}</Descriptions.Item>
+          <Descriptions.Item label="描述">{selectedKB?.description || '-'}</Descriptions.Item>
+          <Descriptions.Item label="可见性">
+            <Tag color={selectedKB?.visibility === 'workspace' ? 'green' : 'orange'}>{selectedKB?.visibility ?? '-'}</Tag>
+          </Descriptions.Item>
+          <Descriptions.Item label="创建时间">{selectedKB?.createdAt ? new Date(selectedKB.createdAt).toLocaleString('zh-CN') : '-'}</Descriptions.Item>
+          <Descriptions.Item label="更新时间">{selectedKB?.updatedAt ? new Date(selectedKB.updatedAt).toLocaleString('zh-CN') : '-'}</Descriptions.Item>
+        </Descriptions>
+      </AdminEditDrawer>
     </Flexbox>
   );
 });
