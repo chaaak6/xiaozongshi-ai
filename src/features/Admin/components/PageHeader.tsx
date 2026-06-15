@@ -1,9 +1,7 @@
 'use client';
 
-import { Breadcrumb, Flex, Typography } from 'antd';
+import { Breadcrumb } from 'antd';
 import { type ReactNode } from 'react';
-
-const { Title } = Typography;
 
 interface AdminPageHeaderProps {
   title: string;
@@ -13,14 +11,15 @@ interface AdminPageHeaderProps {
 
 export function AdminPageHeader({ title, breadcrumb = [], extra }: AdminPageHeaderProps) {
   return (
-    <Flex vertical gap={4} style={{ marginBottom: 16 }}>
+    <div style={{ marginBottom: 16 }}>
       <Breadcrumb
         items={[{ title: '管理后台' }, ...breadcrumb.map((b) => ({ title: b.title }))]}
+        style={{ marginBottom: 4 }}
       />
-      <Flex justify="space-between" align="center">
-        <Title level={3} style={{ margin: 0, flex: '0 0 auto' }}>{title}</Title>
-        <Flex gap={8}>{extra}</Flex>
-      </Flex>
-    </Flex>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h3 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>{title}</h3>
+        <div style={{ display: 'flex', gap: 8 }}>{extra}</div>
+      </div>
+    </div>
   );
 }
