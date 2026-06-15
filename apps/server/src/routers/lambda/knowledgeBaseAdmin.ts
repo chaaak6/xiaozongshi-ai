@@ -37,6 +37,29 @@ export const knowledgeBaseAdminRouter = router({
       return { data };
     }),
 
+  createKnowledgeBase: kbAdminProcedure
+    .input(
+      z.object({
+        name: z.string().min(1).max(200),
+        description: z.string().optional(),
+        visibility: z.enum(['workspace', 'restricted', 'private']).default('workspace'),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { serverDB } = ctx;
+
+      const id = 'kb_' + Date.now().toString(36);
+      await serverDB.insert(knowledgeBases).values({
+        id,
+        name: input.name,
+        description: input.description || '',
+        visibility: input.visibility,
+        userId: ctx.userId,
+      });
+
+      return { id };
+    }),
+
   grantPermission: kbAdminProcedure
     .input(
       z.object({
