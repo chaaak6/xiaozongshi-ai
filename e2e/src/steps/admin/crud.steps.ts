@@ -174,18 +174,29 @@ When('用户点击编辑 Drawer 的保存按钮', async function (this: CustomWo
 
 When('用户在表格中点击 {string} 行的编辑按钮', async function (this: CustomWorld, text: string) {
   console.log(`   📍 在表格中找 "${text}" 行的编辑按钮`);
-  await this.page.waitForTimeout(1000);
-  const row = this.page.locator('tr').filter({ hasText: text }).first();
+  await this.page.waitForTimeout(1500);
+  // Use row text matching then click the button
+  const row = this.page.locator('tr.ant-table-row').filter({ hasText: text }).first();
   if (await row.count() > 0) {
-    const editBtn = row.locator('button, a').filter({ hasText: /编辑/ }).first();
-    if (await editBtn.count() > 0) await editBtn.click({ force: true });
-    else {
-      // Click first link/button in row
-      const firstBtn = row.locator('button, a').first();
-      if (await firstBtn.count() > 0) await firstBtn.click({ force: true });
+    // Click the "编辑" link button in the operations column
+    const opBtns = row.locator('.ant-btn-link, .ant-btn');
+    const cnt = await opBtns.count();
+    for (let i = 0; i < cnt; i++) {
+      const btnText = await opBtns.nth(i).textContent();
+      if (btnText?.includes('编辑')) {
+        await opBtns.nth(i).click({ force: true });
+        console.log(`   ✅ 点击了编辑按钮 (索引${i})`);
+        await this.page.waitForTimeout(2000);
+        return;
+      }
+    }
+    // Fallback: click first link button
+    const firstLink = row.locator('.ant-btn-link').first();
+    if (await firstLink.count() > 0) {
+      await firstLink.click({ force: true });
+      await this.page.waitForTimeout(2000);
     }
   }
-  await this.page.waitForTimeout(1500);
 });
 
 When('用户在表格中点击 {string} 行的删除按钮', async function (this: CustomWorld, text: string) {
