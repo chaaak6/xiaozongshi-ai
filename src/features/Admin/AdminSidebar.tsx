@@ -13,6 +13,7 @@ import {
   TeamOutlined,
   SafetyOutlined,
   AuditOutlined,
+  LoginOutlined,
 } from '@ant-design/icons';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +29,7 @@ const menuItems: MenuProps['items'] = [
   { key: '/admin/knowledge', icon: <BookOutlined />, labelKey: 'knowledge' },
   { key: '/admin/users', icon: <TeamOutlined />, labelKey: 'users' },
   { key: '/admin/rbac', icon: <SafetyOutlined />, labelKey: 'rbac' },
+  { key: '/admin/auth', icon: <LoginOutlined />, labelKey: 'auth' },
   { key: '/admin/audit', icon: <AuditOutlined />, labelKey: 'audit' },
 ];
 

@@ -119,6 +119,7 @@ import VerifyImPage from '@/routes/verify-im';
 // Admin routes — sync imports (Electron local)
 import AdminAgentsPage from '@/routes/admin/agents';
 import AdminAuditPage from '@/routes/admin/audit';
+import AdminAuthPage from '@/routes/admin/auth';
 import AdminDashboardPage from '@/routes/admin';
 import AdminKnowledgePage from '@/routes/admin/knowledge';
 import AdminProvidersPage from '@/routes/admin/providers';
@@ -766,6 +767,7 @@ export const desktopRoutes: RouteObject[] = [
       { element: <AdminUsersPage />, path: 'users' },
       { element: <AdminRbacPage />, path: 'rbac' },
       { element: <AdminAuditPage />, path: 'audit' },
+      { element: <AdminAuthPage />, path: 'auth' },
       { element: <AdminWorkspacesPage />, path: 'workspaces' },
       { element: <AdminWorkspaceDetailPage />, path: 'workspaces/:id' },
       { element: <AdminWorkspaceModelsPage />, path: 'workspaces/:id/models' },

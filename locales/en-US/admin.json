@@ -9,6 +9,7 @@
   "menu.users": "Users",
   "menu.rbac": "RBAC",
   "menu.audit": "Audit Log",
+  "menu.auth": "Auth Config",
   "menu.workspaces": "Workspaces",
   "stats.totalUsers": "Total Users",
   "stats.totalSessions": "Total Sessions",
@@ -79,5 +80,6 @@
   "workspaces.models": "Model Whitelist",
   "workspaces.quota": "Quota Settings",
   "audit.title": "Audit Log",
-  "audit.search": "Search operations..."
+  "audit.search": "Search operations...",
+  "auth.title": "OAuth / Login Configuration"
 }

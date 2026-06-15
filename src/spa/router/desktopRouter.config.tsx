@@ -1013,6 +1013,10 @@ export const desktopRoutes: RouteObject[] = [
         path: 'audit',
       },
       {
+        element: dynamicElement(() => import('@/routes/admin/auth'), 'Desktop > Admin > Auth'),
+        path: 'auth',
+      },
+      {
         element: dynamicElement(() => import('@/routes/admin/workspaces'), 'Desktop > Admin > Workspaces'),
         path: 'workspaces',
       },
