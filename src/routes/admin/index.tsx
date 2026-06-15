@@ -21,10 +21,19 @@ const DashboardPage = memo(() => {
     return <Skeleton active paragraph={{ rows: 6 }} />;
   }
 
+  const formatTokens = (v: number) => {
+    if (v >= 1_000_000) return (v / 1_000_000).toFixed(1) + 'M';
+    if (v >= 1_000) return (v / 1_000).toFixed(1) + 'K';
+    return v.toString();
+  };
+
   const stats = [
     { label: t('stats.totalUsers'), value: dashboardStats.totalUsers },
+    { label: t('stats.activeUsers7d'), value: dashboardStats.activeUsers7d ?? 0 },
     { label: t('stats.totalSessions'), value: dashboardStats.totalSessions },
     { label: t('stats.totalMessages'), value: dashboardStats.totalMessages },
+    { label: t('stats.messagesLast7d'), value: dashboardStats.messagesLast7d ?? 0 },
+    { label: t('stats.totalTokens'), value: formatTokens(dashboardStats.totalTokens ?? 0) },
     { label: t('stats.totalKnowledgeBases'), value: dashboardStats.totalKnowledgeBases },
     { label: t('stats.weeklyActiveSessions'), value: dashboardStats.weeklyActiveSessions },
     { label: t('stats.monthlyActiveUsers'), value: dashboardStats.monthlyActiveUsers },

@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gte, ilike, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, ilike, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { knowledgeBases } from '@/database/schemas/file';
@@ -33,17 +33,40 @@ export const adminRouter = router({
       .from(sessions)
       .where(gte(sessions.updatedAt, sevenDaysAgo));
 
-    // 30-day active users
+    // 7-day active users (UV)
     const [monthlyActiveRow] = await serverDB
       .select({ count: count() })
       .from(users)
       .where(gte(users.lastActiveAt, thirtyDaysAgo));
+
+    // Total tokens consumed (from messages.usage JSONB)
+    const [tokenRow] = await serverDB.execute(
+      sql`SELECT COALESCE(SUM(COALESCE((usage->>'totalTokens')::int, 0)), 0) as total FROM messages`
+    );
+    const totalTokens = tokenRow?.rows?.[0]?.total ? Number(tokenRow.rows[0].total) : 0;
+
+    // 7-day messages
+    const [msg7d] = await serverDB
+      .select({ count: count() })
+      .from(messages)
+      .where(gte(messages.createdAt, sevenDaysAgo));
+
+    // 7-day active users (unique userId in messages)
+    const uv7d = await serverDB
+      .select({ userId: messages.userId })
+      .from(messages)
+      .where(gte(messages.createdAt, sevenDaysAgo))
+      .groupBy(messages.userId);
+    const uniqueUsers7d = new Set(uv7d.map(r => r.userId)).size;
 
     return {
       totalUsers: Number(userCount?.count ?? 0),
       totalSessions: Number(sessionCount?.count ?? 0),
       totalMessages: Number(messageCount?.count ?? 0),
       totalKnowledgeBases: Number(kbCount?.count ?? 0),
+      totalTokens,
+      messagesLast7d: Number(msg7d?.count ?? 0),
+      activeUsers7d: uniqueUsers7d,
       weeklyActiveSessions: Number(weeklyActiveRow?.count ?? 0),
       monthlyActiveUsers: Number(monthlyActiveRow?.count ?? 0),
     };
